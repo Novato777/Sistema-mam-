@@ -13,6 +13,8 @@ import {
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+import API_URL from '../config/api';
+
 interface Provider {
   id: number;
   name: string;
@@ -89,10 +91,10 @@ export default function Lichigueria() {
   const fetchData = async () => {
     try {
       const [dbRes, provRes, salesRes, expRes] = await Promise.all([
-        fetch('http://localhost:4000/api/lichigueria/dashboard', { headers }),
-        fetch('http://localhost:4000/api/lichigueria/providers', { headers }),
-        fetch('http://localhost:4000/api/lichigueria/sales', { headers }),
-        fetch('http://localhost:4000/api/lichigueria/expenses', { headers })
+        fetch(`${API_URL}/api/lichigueria/dashboard`, { headers }),
+        fetch(`${API_URL}/api/lichigueria/providers`, { headers }),
+        fetch(`${API_URL}/api/lichigueria/sales`, { headers }),
+        fetch(`${API_URL}/api/lichigueria/expenses`, { headers })
       ]);
 
       if (!dbRes.ok || !provRes.ok || !salesRes.ok || !expRes.ok) {
@@ -122,7 +124,7 @@ export default function Lichigueria() {
   const handleCreateSale = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/api/lichigueria/sales', {
+      const response = await fetch(`${API_URL}/api/lichigueria/sales`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -160,7 +162,7 @@ export default function Lichigueria() {
   const handleCreateExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/api/lichigueria/expenses', {
+      const response = await fetch(`${API_URL}/api/lichigueria/expenses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,7 +196,7 @@ export default function Lichigueria() {
   const handleCreateProvider = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/api/lichigueria/providers', {
+      const response = await fetch(`${API_URL}/api/lichigueria/providers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,7 +220,7 @@ export default function Lichigueria() {
   const generatePdfReport = async () => {
     setPdfGenerating(true);
     try {
-      const response = await fetch(`http://localhost:4000/api/reports/daily?module=lichigueria&date=${pdfDate}`, { headers });
+      const response = await fetch(`${API_URL}/api/reports/daily?module=lichigueria&date=${pdfDate}`, { headers });
       if (!response.ok) {
         throw new Error('Error al consultar reporte diario.');
       }

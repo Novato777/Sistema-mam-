@@ -16,6 +16,8 @@ import {
   ClipboardList
 } from 'lucide-react';
 
+import API_URL from '../config/api';
+
 interface Guest {
   name: string;
   document?: string;
@@ -104,9 +106,9 @@ export default function Hotel1() {
       const headers = { Authorization: `Bearer ${token}` };
       
       const [dbRes, roomsRes, txRes] = await Promise.all([
-        fetch('http://localhost:4000/api/hotel-1/dashboard', { headers }),
-        fetch('http://localhost:4000/api/hotel-1/rooms', { headers }),
-        fetch('http://localhost:4000/api/hotel-1/transactions', { headers })
+        fetch(`${API_URL}/api/hotel-1/dashboard`, { headers }),
+        fetch(`${API_URL}/api/hotel-1/rooms`, { headers }),
+        fetch(`${API_URL}/api/hotel-1/transactions`, { headers })
       ]);
 
       if (!dbRes.ok || !roomsRes.ok || !txRes.ok) {
@@ -136,7 +138,7 @@ export default function Hotel1() {
     if (!selectedRoom) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/api/hotel-1/rooms/${selectedRoom.id}/guest`, {
+      const response = await fetch(`${API_URL}/api/hotel-1/rooms/${selectedRoom.id}/guest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -170,7 +172,7 @@ export default function Hotel1() {
     if (!selectedRoom) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/api/hotel-1/rooms/${selectedRoom.id}/payment`, {
+      const response = await fetch(`${API_URL}/api/hotel-1/rooms/${selectedRoom.id}/payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -200,7 +202,7 @@ export default function Hotel1() {
     if (!confirm('¿Está seguro de realizar el Check-out y liberar la habitación?')) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/api/hotel-1/rooms/${roomId}/checkout`, {
+      const response = await fetch(`${API_URL}/api/hotel-1/rooms/${roomId}/checkout`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
@@ -221,7 +223,7 @@ export default function Hotel1() {
   const handleAddRoom = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/api/hotel-1/rooms', {
+      const response = await fetch(`${API_URL}/api/hotel-1/rooms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -250,7 +252,7 @@ export default function Hotel1() {
   const handleAddTx = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/api/hotel-1/transactions', {
+      const response = await fetch(`${API_URL}/api/hotel-1/transactions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -12,6 +12,8 @@ import {
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+import API_URL from '../config/api';
+
 interface Sale {
   id: number;
   product: string;
@@ -76,9 +78,9 @@ export default function Restaurante() {
   const fetchData = async () => {
     try {
       const [dbRes, salesRes, expRes] = await Promise.all([
-        fetch('http://localhost:4000/api/restaurante/dashboard', { headers }),
-        fetch('http://localhost:4000/api/restaurante/sales', { headers }),
-        fetch('http://localhost:4000/api/restaurante/expenses', { headers })
+        fetch(`${API_URL}/api/restaurante/dashboard`, { headers }),
+        fetch(`${API_URL}/api/restaurante/sales`, { headers }),
+        fetch(`${API_URL}/api/restaurante/expenses`, { headers })
       ]);
 
       if (!dbRes.ok || !salesRes.ok || !expRes.ok) {
@@ -106,7 +108,7 @@ export default function Restaurante() {
   const handleCreateSale = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/api/restaurante/sales', {
+      const response = await fetch(`${API_URL}/api/restaurante/sales`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +146,7 @@ export default function Restaurante() {
   const handleCreateExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/api/restaurante/expenses', {
+      const response = await fetch(`${API_URL}/api/restaurante/expenses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -180,7 +182,7 @@ export default function Restaurante() {
   const generatePdfReport = async () => {
     setPdfGenerating(true);
     try {
-      const response = await fetch(`http://localhost:4000/api/reports/daily?module=restaurante&date=${pdfDate}`, { headers });
+      const response = await fetch(`${API_URL}/api/reports/daily?module=restaurante&date=${pdfDate}`, { headers });
       if (!response.ok) {
         throw new Error('Error al consultar reporte diario.');
       }
