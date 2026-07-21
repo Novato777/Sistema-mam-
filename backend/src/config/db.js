@@ -1,4 +1,3 @@
-const sqlite3 = require('sqlite3').verbose();
 const { Pool } = require('pg');
 const path = require('path');
 
@@ -16,6 +15,8 @@ if (process.env.DATABASE_URL) {
   });
   console.log('Detectado entorno cloud: Conectado exitosamente a PostgreSQL (Neon).');
 } else {
+  // Importar sqlite3 de forma condicional para evitar que intente cargarse en entornos Linux de producción
+  const sqlite3 = require('sqlite3').verbose();
   const dbPath = path.resolve(__dirname, '../../sistema_familiar.db');
   sqliteDb = new sqlite3.Database(dbPath, (err) => {
     if (err) {
