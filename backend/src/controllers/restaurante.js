@@ -1,0 +1,123 @@
+const db = require('../config/db');
+
+const getTodayString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+exports.getDashboard = async (req, res) => {
+  try {
+    const today = getTodayString();
+    const currentMonth = today.substring(0, 7);
+
+    // 1. Ventas (Ingresos) hoy
+    const salesToday = await db.get(
+      'SELECT SUM(value * quantity) as sum FROM restaurant_sales WHERE date = ?',
+      [today]
+    );
+
+    // 2. Gastos hoy
+    const expensesToday = await db.get(
+      'SELECT SUM(value) as sum FROM restaurant_expenses WHERE date = ?',
+      [today]
+    );
+
+    // 3. Ventas (Ingresos) mes
+    const salesMonth = await db.get(
+      'SELECT SUM(value * quantity) as sum FROM restaurant_sales WHERE date LIKE ?',
+      [`${currentMonth}%`]
+    );
+
+    // 4. Gastos mes
+    const expensesMonth = await db.get(
+      'SELECT SUM(value) as sum FROM restaurant_expenses WHERE date LIKE ?',
+      [`${currentMonth}%`]
+    );
+
+    const valSalesToday = salesToday.sum || 0;
+    const valExpToday = expensesToday.sum || 0;
+    const valSalesMonth = salesMonth.sum || 0;
+    const valExpMonth = expensesMonth.sum || 0;
+
+    res.json({
+      today: {
+        sales: valSalesToday,
+        expense: valExpToday,
+        balance: valSalesToday - valExpToday
+      },
+      month: {
+        sales: valSalesMonth,
+        expense: valExpMonth,
+        balance: valSalesMonth - valExpMonth
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener dashboard del restaurante.' });
+  }
+};
+
+exports.createSale = async (req, res) => {
+  const { product, quantity, value, payment_method, date, observations } = req.body;
+
+  if (!product || !quantity || !value || !payment_method) {
+    return res.status(400).json({ error: 'Producto, cantidad, valor y forma de pago son requeridos.' });
+  }
+
+  const saleDate = date || getTodayString();
+
+  try {
+    await db.run(
+      'INSERT INTO restaurant_sales (product, quantity, value, payment_method, date, observations) VALUES (?, ?, ?, ?, ?, ?)',
+      [product, parseInt(quantity), parseFloat(value), payment_method, saleDate, observations || '']
+    );
+    res.status(201).json({ message: 'Venta registrada con éxito.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al registrar venta.' });
+  }
+};
+
+exports.getSales = async (req, res) => {
+  try {
+    const sales = await db.query(
+      'SELECT *, (value * quantity) as total FROM restaurant_sales ORDER BY date DESC, id DESC LIMIT 50'
+    );
+    res.json(sales);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al listar ventas.' });
+  }
+};
+
+exports.createExpense = async (req, res) => {
+  const { provider, concept, value, date, observations } = req.body;
+
+  if (!provider || !concept || !value) {
+    return res.status(400).json({ error: 'Proveedor, concepto y valor son requeridos.' });
+  }
+
+  const expenseDate = date || getTodayString();
+
+  try {
+    await db.run(
+      'INSERT INTO restaurant_expenses (provider, concept, value, date, observations) VALUES (?, ?, ?, ?, ?)',
+      [provider, concept, parseFloat(value), expenseDate, observations || '']
+    );
+    res.status(201).json({ message: 'Gasto registrado con éxito.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al registrar gasto.' });
+  }
+};
+
+exports.getExpenses = async (req, res) => {
+  try {
+    const expenses = await db.query(
+      'SELECT * FROM restaurant_expenses ORDER BY date DESC, id DESC LIMIT 50'
+    );
+    res.json(expenses);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al listar gastos.' });
+  }
+};
