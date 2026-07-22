@@ -63,7 +63,7 @@ export default function Landing() {
     <div 
       className="min-h-screen text-slate-100 font-sans relative overflow-hidden flex flex-col justify-between selection:bg-indigo-500 selection:text-white"
       style={{
-        backgroundColor: '#02040a',
+        backgroundColor: '#060912',
         backgroundImage: `
           radial-gradient(circle at 75% 30%, rgba(99, 102, 241, 0.20), transparent 60%),
           radial-gradient(circle at 20% 25%, rgba(99, 102, 241, 0.10), transparent 50%),
@@ -87,7 +87,7 @@ export default function Landing() {
           alt="Background Banner" 
           className="absolute right-0 top-0 w-full md:w-[60%] lg:w-[50%] h-full object-cover opacity-60" 
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#02040a]/60 to-[#02040a]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#060912]/60 to-[#060912]"></div>
       </div>
 
       {/* Luces decorativas de fondo adicionales */}
@@ -130,7 +130,7 @@ export default function Landing() {
             </span>
           </h1>
 
-          <p className="text-slate-450 text-base sm:text-lg leading-relaxed max-w-xl font-medium">
+          <p className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl font-medium">
             Esta plataforma representa un **software desarrollado a medida**, adaptado con precisión milimétrica según los flujos de trabajo, necesidades y requerimientos específicos del cliente. Sin licenciamientos innecesarios, ligero y optimizado para potenciar los negocios familiares en tiempo real.
           </p>
 
@@ -159,42 +159,42 @@ export default function Landing() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           
-          <div className="p-6 bg-slate-900/35 backdrop-blur-xs border border-slate-900 hover:border-indigo-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(99,102,241,0.05)] group">
+          <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-indigo-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(99,102,241,0.05)] group">
             <div className="p-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl w-fit">
               <Building2 className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-white text-lg group-hover:text-indigo-400 transition-colors">Módulo Hotelero</h3>
-            <p className="text-slate-450 text-xs leading-relaxed font-medium">
+            <p className="text-slate-400 text-xs leading-relaxed font-medium">
               Control de habitaciones, asignación de huéspedes, cronograma de próximos pagos y alertas de morosidad en tiempo real.
             </p>
           </div>
 
-          <div className="p-6 bg-slate-900/35 backdrop-blur-xs border border-slate-900 hover:border-rose-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(244,63,94,0.05)] group">
+          <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-rose-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(244,63,94,0.05)] group">
             <div className="p-3 bg-rose-500/10 text-rose-45 border border-rose-500/20 rounded-2xl w-fit">
               <UtensilsCrossed className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-white text-lg group-hover:text-rose-400 transition-colors">Gastronomía</h3>
-            <p className="text-slate-450 text-xs leading-relaxed font-medium">
+            <p className="text-slate-400 text-xs leading-relaxed font-medium">
               Ventas rápidas de restaurante, control de métodos de pago (Efectivo/Transferencia) y reporte diario de caja.
             </p>
           </div>
 
-          <div className="p-6 bg-slate-900/35 backdrop-blur-xs border border-slate-900 hover:border-amber-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(245,158,11,0.05)] group">
+          <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-amber-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(245,158,11,0.05)] group">
             <div className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl w-fit">
               <Leaf className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-white text-lg group-hover:text-amber-400 transition-colors">Lichiguería</h3>
-            <p className="text-slate-450 text-xs leading-relaxed font-medium">
+            <p className="text-slate-400 text-xs leading-relaxed font-medium">
               Gestión de proveedores locales, registro por pesaje e inventario simplificado para máxima agilidad comercial.
             </p>
           </div>
 
-          <div className="p-6 bg-slate-900/35 backdrop-blur-xs border border-slate-900 hover:border-emerald-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(16,185,129,0.05)] group">
+          <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-emerald-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(16,185,129,0.05)] group">
             <div className="p-3 bg-emerald-500/10 text-emerald-455 border border-emerald-500/20 rounded-2xl w-fit">
               <FileText className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-white text-lg group-hover:text-emerald-400 transition-colors">Reportes PDF</h3>
-            <p className="text-slate-450 text-xs leading-relaxed font-medium">
+            <p className="text-slate-400 text-xs leading-relaxed font-medium">
               Generación de informes de venta e historiales financieros en formato PDF de alta velocidad, listos para descargar.
             </p>
           </div>
@@ -328,7 +328,7 @@ export default function Landing() {
                   >
                     <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 text-[#22d3ee]" aria-hidden>
                       <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.8.37-.27.3-1.05 1.02-1.05 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.11 3.22 5.11 4.51.71.31 1.27.49 1.71.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35z" />
-                      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.5 0-2.97-.4-4.25-1.16l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.36c0-4.54 3.7 8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24z" />
+                      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.5 0-2.97-.4-4.25-1.16l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.36c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24z" />
                     </svg>
                     <span>{whatsappDisplay}</span>
                   </a>
