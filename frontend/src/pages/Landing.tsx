@@ -65,20 +65,21 @@ export default function Landing() {
       style={{
         backgroundColor: '#02040a',
         backgroundImage: `
+          radial-gradient(circle at 75% 30%, rgba(99, 102, 241, 0.22), transparent 60%),
           radial-gradient(circle at 20% 25%, rgba(99, 102, 241, 0.12), transparent 50%),
-          radial-gradient(circle at 80% 60%, rgba(16, 185, 129, 0.07), transparent 50%),
+          radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.07), transparent 50%),
           linear-gradient(rgba(255, 255, 255, 0.007) 1px, transparent 1px),
           linear-gradient(90deg, rgba(255, 255, 255, 0.007) 1px, transparent 1px)
         `,
-        backgroundSize: '100% 100%, 100% 100%, 32px 32px, 32px 32px'
+        backgroundSize: '100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px'
       }}
     >
       {/* Imagen de fondo cinematográfica con opacidad y degradado */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden h-[700px] md:h-[900px]">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden h-[750px] md:h-[950px]">
         <img 
           src="/fondoPAGE.png" 
           alt="Background Banner" 
-          className="w-full h-full object-cover opacity-[0.16] mix-blend-luminosity" 
+          className="w-full h-full object-cover opacity-[0.24] mix-blend-luminosity" 
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/70 to-slate-950"></div>
       </div>
@@ -86,8 +87,8 @@ export default function Landing() {
       {/* Luces decorativas de fondo adicionales */}
       <div className="absolute top-[-10%] left-[-5%] w-[450px] h-[450px] bg-indigo-600/5 rounded-full blur-[130px] -z-10 pointer-events-none"></div>
 
-      {/* Navbar Superior */}
-      <header className="max-w-7xl mx-auto w-full px-6 py-6 flex items-center justify-between border-b border-slate-900/60 sticky top-0 bg-slate-950/70 backdrop-blur-md z-50">
+      {/* Navbar Superior (Transparente sin fondos) */}
+      <header className="max-w-7xl mx-auto w-full px-6 py-6 flex items-center justify-between border-b border-slate-900/30 sticky top-0 bg-transparent z-50">
         <div className="flex items-center space-x-3">
           <div className="relative">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-lg blur-xs opacity-75"></div>
@@ -107,10 +108,10 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center flex-1 relative z-10">
+      <main className="max-w-7xl mx-auto w-full px-6 pt-16 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center relative z-10">
         
         {/* Info Izquierda */}
-        <div className="lg:col-span-6 space-y-8">
+        <div className="lg:col-span-7 space-y-8">
           <div className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-semibold uppercase tracking-widest">
             <Sparkles className="w-3.5 h-3.5 animate-pulse" />
             <span>Desarrollo de Software Exclusivo</span>
@@ -141,8 +142,16 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Módulos Derecha */}
-        <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* Columna derecha vacía para apreciar la imagen de fondo */}
+        <div className="lg:col-span-5 h-[150px] lg:h-auto"></div>
+      </main>
+
+      {/* Sección de Cards al Fondo (Abajo de la Hero) */}
+      <section className="max-w-7xl mx-auto w-full px-6 pb-24 relative z-10">
+        <h2 className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500 mb-8 text-center lg:text-left">
+          Módulos Integrados del Sistema
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           
           <div className="p-6 bg-slate-900/35 backdrop-blur-xs border border-slate-900 hover:border-indigo-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(99,102,241,0.05)] group">
             <div className="p-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl w-fit">
@@ -185,8 +194,7 @@ export default function Landing() {
           </div>
 
         </div>
-
-      </main>
+      </section>
 
       {/* FOOTER COPIADO TAL CUAL DE NEXU */}
       <footer className="relative overflow-hidden border-t border-[#1c2740] bg-[#060912]">
