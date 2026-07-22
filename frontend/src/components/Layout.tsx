@@ -41,11 +41,8 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar para pantallas grandes */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-100 p-6 space-y-6 shrink-0">
-        <div className="flex items-center space-x-3 px-2 py-4">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
-            F
-          </div>
-          <span className="font-semibold text-slate-800 text-lg">AdminFamiliar</span>
+        <div className="flex justify-center px-1 py-2 mb-2">
+          <img src="/logo.png" alt="Logo" className="w-full max-h-24 object-contain" />
         </div>
 
         <nav className="flex-1 space-y-1">
@@ -97,11 +94,8 @@ export default function Layout({ children }: LayoutProps) {
         <div className="fixed inset-0 z-50 flex md:hidden bg-slate-900/40 backdrop-blur-xs">
           <div className="w-64 bg-white p-6 flex flex-col space-y-6 animate-in slide-in-from-left duration-200">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
-                  F
-                </div>
-                <span className="font-semibold text-slate-800">AdminFamiliar</span>
+              <div className="flex items-center px-1">
+                <img src="/logo.png" alt="Logo" className="max-h-14 object-contain" />
               </div>
               <button onClick={() => setSidebarOpen(false)} className="p-1.5 text-slate-500 bg-slate-100 rounded-lg">
                 <X className="w-5 h-5" />
