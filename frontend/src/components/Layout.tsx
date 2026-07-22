@@ -153,12 +153,12 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Área de contenido principal */}
       <div className={`flex-1 flex flex-col min-w-0 overflow-hidden transition-all duration-300 ${
-        location.pathname === '/hotel-1' ? 'bg-emerald-50/40' :
-        location.pathname === '/hotel-2' ? 'bg-teal-50/40' :
-        location.pathname === '/restaurante' ? 'bg-rose-50/40' :
-        location.pathname === '/lichigueria' ? 'bg-amber-50/40' :
-        location.pathname === '/' ? 'bg-indigo-50/20' :
-        'bg-slate-50'
+        location.pathname === '/hotel-1' ? 'bg-emerald-100/40' :
+        location.pathname === '/hotel-2' ? 'bg-teal-100/40' :
+        location.pathname === '/restaurante' ? 'bg-rose-100/40' :
+        location.pathname === '/lichigueria' ? 'bg-amber-100/45' :
+        location.pathname === '/' ? 'bg-slate-100' :
+        'bg-slate-100'
       }`}>
         {/* Header móvil */}
         <header className="md:hidden flex items-center justify-between bg-white border-b border-slate-100 px-6 py-4">
@@ -175,11 +175,13 @@ export default function Layout({ children }: LayoutProps) {
             A
           </div>
         </header>
-
-        {/* Contenido */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-10 max-w-7xl w-full mx-auto">
-          {children}
-        </main>
+ 
+        {/* Contenedor de scroll de ancho completo para que la barra quede en el borde derecho de la pantalla */}
+        <div className="flex-1 overflow-y-auto">
+          <main className="p-6 md:p-10 max-w-7xl w-full mx-auto">
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );
