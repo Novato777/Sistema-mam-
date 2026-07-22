@@ -15,69 +15,66 @@ interface BusinessStats {
   lichigueria: { salesToday: number; target: number; percentage: number };
 }
 
-interface DoughnutSegment {
-  value: number;
-  color: string;
-}
-
 function DoughnutChart({ 
-  segments, 
+  percentage, 
+  color, 
+  backgroundColor = "#e2e8f0",
   totalLabel, 
   totalValue,
   legend
 }: { 
-  segments: DoughnutSegment[]; 
+  percentage: number; 
+  color: string; 
+  backgroundColor?: string;
   totalLabel: string; 
   totalValue: string | number;
   legend: React.ReactNode;
 }) {
   const radius = 36;
   const strokeWidth = 8;
-  const circumference = 2 * Math.PI * radius;
+  const circumference = 2 * Math.PI * radius; // ~226.2
   const center = 50;
-
-  const activeSegments = segments.filter(seg => seg.value > 0);
-  let accumulatedPercentage = 0;
+  
+  // Calcular el offset de la barra de progreso
+  const strokeOffset = circumference - (Math.min(100, Math.max(0, percentage)) / 100) * circumference;
 
   return (
-    <div className="flex items-center space-x-5 bg-white/40 backdrop-blur-xs p-4 rounded-2xl border border-slate-100/80 shadow-xs">
+    <div className="flex items-center space-x-5 bg-white/45 backdrop-blur-xs p-4 rounded-2xl border border-slate-100/80 shadow-xs">
       <div className="relative w-24 h-24 flex-shrink-0">
         <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+          {/* Círculo de fondo base */}
           <circle
             cx={center}
             cy={center}
             r={radius}
             fill="transparent"
-            stroke="#f1f5f9"
+            stroke={backgroundColor}
             strokeWidth={strokeWidth}
           />
-          {activeSegments.map((seg, idx) => {
-            const strokeLength = (seg.value / 100) * circumference;
-            const strokeOffset = circumference - strokeLength - (accumulatedPercentage / 100) * circumference;
-            accumulatedPercentage += seg.value;
-
-            return (
-              <circle
-                key={idx}
-                cx={center}
-                cy={center}
-                r={radius}
-                fill="transparent"
-                stroke={seg.color}
-                strokeWidth={strokeWidth}
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeOffset}
-                strokeLinecap="round"
-                className="transition-all duration-700 ease-out"
-              />
-            );
-          })}
+          {/* Círculo de progreso de color en la parte superior */}
+          {percentage > 0 && (
+            <circle
+              cx={center}
+              cy={center}
+              r={radius}
+              fill="transparent"
+              stroke={color}
+              strokeWidth={strokeWidth}
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeOffset}
+              strokeLinecap="round"
+              className="transition-all duration-700 ease-out"
+            />
+          )}
         </svg>
+        {/* Texto en el Centro */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
           <span className="text-lg font-black text-slate-800 leading-none">{totalValue}</span>
           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{totalLabel}</span>
         </div>
       </div>
+      
+      {/* Leyenda a la derecha */}
       <div className="flex-1 min-w-0">
         {legend}
       </div>
@@ -108,8 +105,9 @@ export default function Dashboard() {
           const restData = await restRes.json();
           const lichiData = await lichiRes.json();
 
-          const restTarget = 200000;
-          const lichiTarget = 150000;
+          // Metas de venta diaria incrementadas por solicitud del usuario
+          const restTarget = 500000;  // $500.000 diario
+          const lichiTarget = 300000; // $300.000 diario
 
           setStats({
             hotel1: {
@@ -123,14 +121,14 @@ export default function Dashboard() {
               percentage: h2Data.rooms.total ? Math.round((h2Data.rooms.occupied / h2Data.rooms.total) * 100) : 0
             },
             restaurante: {
-              salesToday: restData.today.sales || 0,
+              salesToday: Number(restData.today.sales || 0),
               target: restTarget,
-              percentage: Math.min(100, Math.round(( (restData.today.sales || 0) / restTarget) * 100))
+              percentage: Math.min(100, Math.round((Number(restData.today.sales || 0) / restTarget) * 100))
             },
             lichigueria: {
-              salesToday: lichiData.today.sales || 0,
+              salesToday: Number(lichiData.today.sales || 0),
               target: lichiTarget,
-              percentage: Math.min(100, Math.round(( (lichiData.today.sales || 0) / lichiTarget) * 100))
+              percentage: Math.min(100, Math.round((Number(lichiData.today.sales || 0) / lichiTarget) * 100))
             }
           });
         }
@@ -158,16 +156,14 @@ export default function Dashboard() {
         if (loading || !stats) return <div className="h-24 bg-slate-100/50 animate-pulse rounded-2xl"></div>;
         const { occupied, total, percentage } = stats.hotel1;
         const free = total - occupied;
-        const freePercentage = total ? Math.round((free / total) * 100) : 0;
         
         return (
           <DoughnutChart
             totalValue={total}
             totalLabel="Habs"
-            segments={[
-              { value: percentage, color: '#f43f5e' },
-              { value: freePercentage, color: '#10b981' }
-            ]}
+            percentage={percentage}
+            color="#f43f5e" // Ocupadas - Rojo
+            backgroundColor="#10b981" // Libres - Verde de fondo base
             legend={
               <div className="space-y-2 text-xs">
                 <div className="flex items-center space-x-2">
@@ -197,16 +193,14 @@ export default function Dashboard() {
         if (loading || !stats) return <div className="h-24 bg-slate-100/50 animate-pulse rounded-2xl"></div>;
         const { occupied, total, percentage } = stats.hotel2;
         const free = total - occupied;
-        const freePercentage = total ? Math.round((free / total) * 100) : 0;
 
         return (
           <DoughnutChart
             totalValue={total}
             totalLabel="Habs"
-            segments={[
-              { value: percentage, color: '#f43f5e' },
-              { value: freePercentage, color: '#0d9488' }
-            ]}
+            percentage={percentage}
+            color="#f43f5e" // Ocupadas - Rojo
+            backgroundColor="#0d9488" // Libres - Teal de fondo base
             legend={
               <div className="space-y-2 text-xs">
                 <div className="flex items-center space-x-2">
@@ -235,16 +229,14 @@ export default function Dashboard() {
       renderProgress: () => {
         if (loading || !stats) return <div className="h-24 bg-slate-100/50 animate-pulse rounded-2xl"></div>;
         const { salesToday, target, percentage } = stats.restaurante;
-        const pending = Math.max(0, 100 - percentage);
 
         return (
           <DoughnutChart
             totalValue={`${percentage}%`}
             totalLabel="Meta"
-            segments={[
-              { value: percentage, color: '#ec4899' },
-              { value: pending, color: '#cbd5e1' }
-            ]}
+            percentage={percentage}
+            color="#ec4899" // Rosa vibrante para progreso
+            backgroundColor="#e2e8f0" // Gris base para pendiente
             legend={
               <div className="space-y-1 text-[11px] leading-tight">
                 <div className="text-slate-450 font-bold uppercase tracking-wider text-[9px]">Ventas de hoy</div>
@@ -268,16 +260,14 @@ export default function Dashboard() {
       renderProgress: () => {
         if (loading || !stats) return <div className="h-24 bg-slate-100/50 animate-pulse rounded-2xl"></div>;
         const { salesToday, target, percentage } = stats.lichigueria;
-        const pending = Math.max(0, 100 - percentage);
 
         return (
           <DoughnutChart
             totalValue={`${percentage}%`}
             totalLabel="Meta"
-            segments={[
-              { value: percentage, color: '#f59e0b' },
-              { value: pending, color: '#cbd5e1' }
-            ]}
+            percentage={percentage}
+            color="#f59e0b" // Ámbar para progreso
+            backgroundColor="#e2e8f0" // Gris base para pendiente
             legend={
               <div className="space-y-1 text-[11px] leading-tight">
                 <div className="text-slate-450 font-bold uppercase tracking-wider text-[9px]">Ventas de hoy</div>
