@@ -74,7 +74,7 @@ export default function Landing() {
             <img src="/favicon.png" alt="Logo" className="relative w-9 h-9 object-contain rounded-lg border border-slate-700/50 bg-slate-900 shadow-md" />
           </div>
           <span className="font-black text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-            Mamá Admin
+            SystemPro
           </span>
         </div>
         <Link 
@@ -91,16 +91,15 @@ export default function Landing() {
         
         {/* Info Izquierda */}
         <div className="lg:col-span-6 space-y-8">
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-black uppercase tracking-widest">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-semibold uppercase tracking-widest">
+            <Sparkles className="w-3.5 h-3.5 animate-pulse" />
             <span>Desarrollo de Software Exclusivo</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-none">
-            Administración <br />
-            Empresarial <br />
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent">
-              a la Medida
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+            Software de Gestión <br />
+            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent font-black">
+              Altamente Personalizado
             </span>
           </h1>
 
@@ -125,41 +124,41 @@ export default function Landing() {
         {/* Módulos Derecha */}
         <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
           
-          <div className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-3xl space-y-4 hover:border-indigo-500/40 transition-all hover:shadow-[0_15px_30px_-10px_rgba(99,102,241,0.08)] group">
+          <div className="p-6 bg-slate-900/35 backdrop-blur-xs border border-slate-900 hover:border-indigo-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(99,102,241,0.05)] group">
             <div className="p-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl w-fit">
               <Building2 className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-white text-lg">Módulo Hotelero</h3>
+            <h3 className="font-bold text-white text-lg group-hover:text-indigo-400 transition-colors">Módulo Hotelero</h3>
             <p className="text-slate-450 text-xs leading-relaxed font-medium">
               Control de habitaciones, asignación de huéspedes, cronograma de próximos pagos y alertas de morosidad en tiempo real.
             </p>
           </div>
 
-          <div className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-3xl space-y-4 hover:border-rose-500/40 transition-all hover:shadow-[0_15px_30px_-10px_rgba(244,63,94,0.08)] group">
+          <div className="p-6 bg-slate-900/35 backdrop-blur-xs border border-slate-900 hover:border-rose-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(244,63,94,0.05)] group">
             <div className="p-3 bg-rose-500/10 text-rose-45 border border-rose-500/20 rounded-2xl w-fit">
               <UtensilsCrossed className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-white text-lg">Gastronomía</h3>
+            <h3 className="font-bold text-white text-lg group-hover:text-rose-400 transition-colors">Gastronomía</h3>
             <p className="text-slate-450 text-xs leading-relaxed font-medium">
               Ventas rápidas de restaurante, control de métodos de pago (Efectivo/Transferencia) y reporte diario de caja.
             </p>
           </div>
 
-          <div className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-3xl space-y-4 hover:border-amber-500/40 transition-all hover:shadow-[0_15px_30px_-10px_rgba(245,158,11,0.08)] group">
+          <div className="p-6 bg-slate-900/35 backdrop-blur-xs border border-slate-900 hover:border-amber-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(245,158,11,0.05)] group">
             <div className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl w-fit">
               <Leaf className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-white text-lg">Lichiguería</h3>
+            <h3 className="font-bold text-white text-lg group-hover:text-amber-400 transition-colors">Lichiguería</h3>
             <p className="text-slate-450 text-xs leading-relaxed font-medium">
               Gestión de proveedores locales, registro por pesaje e inventario simplificado para máxima agilidad comercial.
             </p>
           </div>
 
-          <div className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-3xl space-y-4 hover:border-emerald-500/40 transition-all hover:shadow-[0_15px_30px_-10px_rgba(16,185,129,0.08)] group">
+          <div className="p-6 bg-slate-900/35 backdrop-blur-xs border border-slate-900 hover:border-emerald-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(16,185,129,0.05)] group">
             <div className="p-3 bg-emerald-500/10 text-emerald-455 border border-emerald-500/20 rounded-2xl w-fit">
               <FileText className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-white text-lg">Reportes PDF</h3>
+            <h3 className="font-bold text-white text-lg group-hover:text-emerald-400 transition-colors">Reportes PDF</h3>
             <p className="text-slate-450 text-xs leading-relaxed font-medium">
               Generación de informes de venta e historiales financieros en formato PDF de alta velocidad, listos para descargar.
             </p>
