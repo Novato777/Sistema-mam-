@@ -87,7 +87,7 @@ export default function Landing() {
           alt="Background Banner" 
           className="absolute right-0 top-0 w-full md:w-[60%] lg:w-[50%] h-full object-cover opacity-60" 
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#060912]/60 to-[#060912]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-[#060912]/80 to-[#060912] from-0% via-50% via-70% to-80%"></div>
       </div>
 
       {/* Luces decorativas de fondo adicionales */}
