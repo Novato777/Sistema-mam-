@@ -33,20 +33,16 @@ function DoughnutChart({
 }) {
   const radius = 36;
   const strokeWidth = 8;
-  const circumference = 2 * Math.PI * radius; // ~226.2
+  const circumference = 2 * Math.PI * radius;
   const center = 50;
 
-  // Filtrar segmentos con valor mayor a 0 para evitar errores visuales
   const activeSegments = segments.filter(seg => seg.value > 0);
-  
-  // Calcular offsets acumulados para apilar los segmentos correctamente
   let accumulatedPercentage = 0;
 
   return (
-    <div className="flex items-center space-x-5 bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
+    <div className="flex items-center space-x-5 bg-white/40 backdrop-blur-xs p-4 rounded-2xl border border-slate-100/80 shadow-xs">
       <div className="relative w-24 h-24 flex-shrink-0">
         <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-          {/* Círculo de fondo gris */}
           <circle
             cx={center}
             cy={center}
@@ -57,7 +53,6 @@ function DoughnutChart({
           />
           {activeSegments.map((seg, idx) => {
             const strokeLength = (seg.value / 100) * circumference;
-            // El offset se calcula para posicionar el segmento después del anterior
             const strokeOffset = circumference - strokeLength - (accumulatedPercentage / 100) * circumference;
             accumulatedPercentage += seg.value;
 
@@ -78,14 +73,11 @@ function DoughnutChart({
             );
           })}
         </svg>
-        {/* Texto en el Centro */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
           <span className="text-lg font-black text-slate-800 leading-none">{totalValue}</span>
           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{totalLabel}</span>
         </div>
       </div>
-      
-      {/* Leyenda a la derecha */}
       <div className="flex-1 min-w-0">
         {legend}
       </div>
@@ -158,11 +150,12 @@ export default function Dashboard() {
       description: 'Gestión de habitaciones, tarifas, huéspedes y transacciones.',
       icon: Building2,
       path: '/hotel-1',
-      color: 'bg-emerald-500 text-white border-emerald-600 shadow-sm shadow-emerald-100',
+      color: 'bg-emerald-500 text-white border-emerald-600 shadow-lg shadow-emerald-100',
       badge: 'Hotelero',
-      borderHover: 'hover:border-emerald-500 hover:shadow-emerald-100/50',
+      borderHover: 'hover:border-emerald-250 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.18)]',
+      borderTop: 'border-t-4 border-t-emerald-500',
       renderProgress: () => {
-        if (loading || !stats) return <div className="h-24 bg-slate-100 animate-pulse rounded-2xl"></div>;
+        if (loading || !stats) return <div className="h-24 bg-slate-100/50 animate-pulse rounded-2xl"></div>;
         const { occupied, total, percentage } = stats.hotel1;
         const free = total - occupied;
         const freePercentage = total ? Math.round((free / total) * 100) : 0;
@@ -172,18 +165,18 @@ export default function Dashboard() {
             totalValue={total}
             totalLabel="Habs"
             segments={[
-              { value: percentage, color: '#f43f5e' }, // Ocupadas - Rojo/Rosa
-              { value: freePercentage, color: '#10b981' } // Libres - Verde
+              { value: percentage, color: '#f43f5e' },
+              { value: freePercentage, color: '#10b981' }
             ]}
             legend={
-              <div className="space-y-1.5 text-xs">
+              <div className="space-y-2 text-xs">
                 <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-                  <span className="text-slate-600 font-medium truncate">Libres: <b className="text-slate-800">{free}</b></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-sm"></span>
+                  <span className="text-slate-600 font-medium truncate">Libres: <b className="text-slate-800 font-semibold">{free}</b></span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
-                  <span className="text-slate-600 font-medium truncate">Ocupadas: <b className="text-slate-800">{occupied}</b></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block shadow-sm"></span>
+                  <span className="text-slate-600 font-medium truncate">Ocupadas: <b className="text-slate-800 font-semibold">{occupied}</b></span>
                 </div>
               </div>
             }
@@ -196,11 +189,12 @@ export default function Dashboard() {
       description: 'Administración independiente para el segundo hotel.',
       icon: Building2,
       path: '/hotel-2',
-      color: 'bg-teal-500 text-white border-teal-600 shadow-sm shadow-teal-100',
+      color: 'bg-teal-500 text-white border-teal-600 shadow-lg shadow-teal-100',
       badge: 'Hotelero',
-      borderHover: 'hover:border-teal-500 hover:shadow-teal-100/50',
+      borderHover: 'hover:border-teal-250 hover:shadow-[0_20px_40px_-15px_rgba(13,148,136,0.18)]',
+      borderTop: 'border-t-4 border-t-teal-500',
       renderProgress: () => {
-        if (loading || !stats) return <div className="h-24 bg-slate-100 animate-pulse rounded-2xl"></div>;
+        if (loading || !stats) return <div className="h-24 bg-slate-100/50 animate-pulse rounded-2xl"></div>;
         const { occupied, total, percentage } = stats.hotel2;
         const free = total - occupied;
         const freePercentage = total ? Math.round((free / total) * 100) : 0;
@@ -210,18 +204,18 @@ export default function Dashboard() {
             totalValue={total}
             totalLabel="Habs"
             segments={[
-              { value: percentage, color: '#f43f5e' }, // Ocupadas - Rojo/Rosa
-              { value: freePercentage, color: '#0d9488' } // Libres - Teal
+              { value: percentage, color: '#f43f5e' },
+              { value: freePercentage, color: '#0d9488' }
             ]}
             legend={
-              <div className="space-y-1.5 text-xs">
+              <div className="space-y-2 text-xs">
                 <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>
-                  <span className="text-slate-600 font-medium truncate">Libres: <b className="text-slate-800">{free}</b></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block shadow-sm"></span>
+                  <span className="text-slate-600 font-medium truncate">Libres: <b className="text-slate-800 font-semibold">{free}</b></span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
-                  <span className="text-slate-600 font-medium truncate">Ocupadas: <b className="text-slate-800">{occupied}</b></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block shadow-sm"></span>
+                  <span className="text-slate-600 font-medium truncate">Ocupadas: <b className="text-slate-800 font-semibold">{occupied}</b></span>
                 </div>
               </div>
             }
@@ -234,11 +228,12 @@ export default function Dashboard() {
       description: 'Registro rápido de ventas, egresos diarios y balances.',
       icon: UtensilsCrossed,
       path: '/restaurante',
-      color: 'bg-rose-500 text-white border-rose-600 shadow-sm shadow-rose-100',
+      color: 'bg-rose-500 text-white border-rose-600 shadow-lg shadow-rose-100',
       badge: 'Gastronomía',
-      borderHover: 'hover:border-rose-500 hover:shadow-rose-100/50',
+      borderHover: 'hover:border-rose-250 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.18)]',
+      borderTop: 'border-t-4 border-t-rose-500',
       renderProgress: () => {
-        if (loading || !stats) return <div className="h-24 bg-slate-100 animate-pulse rounded-2xl"></div>;
+        if (loading || !stats) return <div className="h-24 bg-slate-100/50 animate-pulse rounded-2xl"></div>;
         const { salesToday, target, percentage } = stats.restaurante;
         const pending = Math.max(0, 100 - percentage);
 
@@ -247,13 +242,13 @@ export default function Dashboard() {
             totalValue={`${percentage}%`}
             totalLabel="Meta"
             segments={[
-              { value: percentage, color: '#ec4899' }, // Ventas hoy - Rosa
-              { value: pending, color: '#cbd5e1' } // Pendiente - Gris
+              { value: percentage, color: '#ec4899' },
+              { value: pending, color: '#cbd5e1' }
             ]}
             legend={
               <div className="space-y-1 text-[11px] leading-tight">
-                <div className="text-slate-500 font-semibold uppercase tracking-wider text-[9px]">Ventas de hoy</div>
-                <div className="text-slate-800 font-bold text-sm truncate">${salesToday.toLocaleString()}</div>
+                <div className="text-slate-450 font-bold uppercase tracking-wider text-[9px]">Ventas de hoy</div>
+                <div className="text-slate-850 font-extrabold text-base truncate">${salesToday.toLocaleString()}</div>
                 <div className="text-slate-400 text-[10px]">Meta: ${target.toLocaleString()}</div>
               </div>
             }
@@ -266,11 +261,12 @@ export default function Dashboard() {
       description: 'Gestión de proveedores locales y ventas rápidas con pesaje.',
       icon: Leaf,
       path: '/lichigueria',
-      color: 'bg-amber-500 text-white border-amber-600 shadow-sm shadow-amber-100',
+      color: 'bg-amber-500 text-white border-amber-600 shadow-lg shadow-amber-100',
       badge: 'Abastecimiento',
-      borderHover: 'hover:border-amber-500 hover:shadow-amber-100/50',
+      borderHover: 'hover:border-amber-250 hover:shadow-[0_20px_40px_-15px_rgba(245,158,11,0.18)]',
+      borderTop: 'border-t-4 border-t-amber-500',
       renderProgress: () => {
-        if (loading || !stats) return <div className="h-24 bg-slate-100 animate-pulse rounded-2xl"></div>;
+        if (loading || !stats) return <div className="h-24 bg-slate-100/50 animate-pulse rounded-2xl"></div>;
         const { salesToday, target, percentage } = stats.lichigueria;
         const pending = Math.max(0, 100 - percentage);
 
@@ -279,13 +275,13 @@ export default function Dashboard() {
             totalValue={`${percentage}%`}
             totalLabel="Meta"
             segments={[
-              { value: percentage, color: '#f59e0b' }, // Ventas hoy - Ámbar/Naranja
-              { value: pending, color: '#cbd5e1' } // Pendiente - Gris
+              { value: percentage, color: '#f59e0b' },
+              { value: pending, color: '#cbd5e1' }
             ]}
             legend={
               <div className="space-y-1 text-[11px] leading-tight">
-                <div className="text-slate-500 font-semibold uppercase tracking-wider text-[9px]">Ventas de hoy</div>
-                <div className="text-slate-800 font-bold text-sm truncate">${salesToday.toLocaleString()}</div>
+                <div className="text-slate-450 font-bold uppercase tracking-wider text-[9px]">Ventas de hoy</div>
+                <div className="text-slate-850 font-extrabold text-base truncate">${salesToday.toLocaleString()}</div>
                 <div className="text-slate-400 text-[10px]">Meta: ${target.toLocaleString()}</div>
               </div>
             }
@@ -296,52 +292,56 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="relative space-y-8 animate-fade-in">
+      {/* Elementos decorativos de fondo tipo Glow Blobs */}
+      <div className="absolute top-[-10%] left-[-15%] w-[350px] h-[350px] bg-indigo-200/35 rounded-full blur-[90px] -z-10 pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[350px] h-[350px] bg-teal-200/25 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-900 bg-clip-text text-transparent">
           Hola, Administrador
         </h1>
-        <p className="text-slate-500 max-w-lg">
-          Selecciona uno de los módulos a continuación para empezar a gestionar los negocios familiares.
+        <p className="text-slate-500 max-w-lg font-medium text-sm leading-relaxed">
+          Selecciona uno de los módulos a continuación para empezar a gestionar los negocios familiares de forma inteligente.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
             <Link
               key={card.path}
               to={card.path}
-              className={`group relative bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs hover:shadow-md ${card.borderHover} active:scale-[0.99] transition-all flex flex-col justify-between h-[360px]`}
+              className={`group relative bg-white/70 backdrop-blur-md p-7 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:-translate-y-1.5 transition-all flex flex-col justify-between h-[390px] ${card.borderTop} ${card.borderHover}`}
             >
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <div className={`p-3.5 rounded-xl border ${card.color}`}>
-                    <Icon className="w-5 h-5" />
+                  <div className={`p-3.5 rounded-2xl border ${card.color}`}>
+                    <Icon className="w-5.5 h-5.5" />
                   </div>
-                  <span className="text-xs font-medium px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-3.5 py-1.5 bg-slate-50 border border-slate-100 text-slate-500 rounded-full shadow-2xs">
                     {card.badge}
                   </span>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-lg font-semibold text-slate-800 group-hover:text-slate-900">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-slate-800 group-hover:text-indigo-950 transition-colors">
                     {card.title}
                   </h3>
-                  <p className="text-xs text-slate-450 leading-relaxed max-w-xs">
+                  <p className="text-xs text-slate-450 leading-relaxed max-w-xs font-medium">
                     {card.description}
                   </p>
                 </div>
               </div>
 
-              {/* Gráfico circular de progreso (Doughnut Chart) */}
-              <div className="my-3">
+              {/* Gráfico circular */}
+              <div className="my-2">
                 {card.renderProgress()}
               </div>
               
-              <div className="flex items-center space-x-2 text-xs font-medium text-slate-600 group-hover:text-slate-900 self-start">
+              <div className="flex items-center space-x-2 text-xs font-bold text-slate-650 group-hover:text-indigo-650 transition-all self-start">
                 <span>Ingresar al módulo</span>
-                <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform" />
               </div>
             </Link>
           );
