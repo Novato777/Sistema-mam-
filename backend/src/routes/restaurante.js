@@ -6,7 +6,9 @@ const requireAuth = require('../middleware/auth');
 router.get('/dashboard', requireAuth, restController.getDashboard);
 router.post('/sales', requireAuth, restController.createSale);
 router.get('/sales', requireAuth, restController.getSales);
+router.delete('/sales/:id', requireAuth, restController.deleteSale);
 router.post('/expenses', requireAuth, restController.createExpense);
 router.get('/expenses', requireAuth, restController.getExpenses);
+router.delete('/expenses/:id', requireAuth, restController.deleteExpense);
 
 module.exports = router;

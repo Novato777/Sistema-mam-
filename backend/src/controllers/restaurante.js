@@ -121,3 +121,25 @@ exports.getExpenses = async (req, res) => {
     res.status(500).json({ error: 'Error al listar gastos.' });
   }
 };
+
+// Eliminar venta
+exports.deleteSale = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.run('DELETE FROM restaurant_sales WHERE id = ?', [id]);
+    res.json({ message: 'Venta eliminada con éxito.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar venta.' });
+  }
+};
+
+// Eliminar gasto
+exports.deleteExpense = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.run('DELETE FROM restaurant_expenses WHERE id = ?', [id]);
+    res.json({ message: 'Gasto eliminado con éxito.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar gasto.' });
+  }
+};

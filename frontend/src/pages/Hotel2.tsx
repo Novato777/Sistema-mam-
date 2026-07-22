@@ -6,7 +6,8 @@ import {
   Plus, 
   User, 
   X, 
-  ClipboardList
+  ClipboardList,
+  Trash2
 } from 'lucide-react';
 import API_URL from '../config/api';
 
@@ -277,6 +278,29 @@ export default function Hotel2() {
     }
   };
 
+  const handleDeleteTransaction = async (id: number) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar esta transacción? Esta acción no se puede deshacer y afectará los reportes y balances.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/hotel-2/transactions/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar transacción');
+      }
+
+      fetchData();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -421,6 +445,7 @@ export default function Hotel2() {
                 <th className="py-3 px-2">Categoría</th>
                 <th className="py-3 px-2">Descripción</th>
                 <th className="py-3 px-2 text-right">Monto</th>
+                <th className="py-3 px-2 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -441,11 +466,20 @@ export default function Hotel2() {
                   }`}>
                     ${tx.amount.toLocaleString()}
                   </td>
+                  <td className="py-3.5 px-2 text-center">
+                    <button
+                      onClick={() => handleDeleteTransaction(tx.id)}
+                      className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all"
+                      title="Eliminar transacción"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
                 </tr>
               ))}
               {transactions.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-slate-450">No hay transacciones registradas aún.</td>
+                  <td colSpan={6} className="py-6 text-center text-slate-450">No hay transacciones registradas aún.</td>
                 </tr>
               )}
             </tbody>

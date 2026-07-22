@@ -7,7 +7,8 @@ import {
   X, 
   DollarSign,
   ClipboardList,
-  FileText
+  FileText,
+  Trash2
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -173,6 +174,44 @@ export default function Restaurante() {
         date: new Date().toISOString().split('T')[0],
         observations: ''
       });
+      fetchData();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteSale = async (id: number) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar esta venta? Se descontará del reporte y balance.')) {
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/api/restaurante/sales/${id}`, {
+        method: 'DELETE',
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar venta');
+      }
+      fetchData();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteExpense = async (id: number) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este gasto? Se recalcularán los reportes.')) {
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/api/restaurante/expenses/${id}`, {
+        method: 'DELETE',
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar gasto');
+      }
       fetchData();
     } catch (err: any) {
       alert(err.message);
@@ -357,6 +396,7 @@ export default function Restaurante() {
                   <th className="py-3 px-2">Cant.</th>
                   <th className="py-3 px-2">Pago</th>
                   <th className="py-3 px-2 text-right">Total</th>
+                  <th className="py-3 px-2 text-center">Acción</th>
                 </tr>
               </thead>
               <tbody>
@@ -368,11 +408,20 @@ export default function Restaurante() {
                     <td className="py-3 px-2 text-right font-semibold text-emerald-600">
                       ${sale.total.toLocaleString()}
                     </td>
+                    <td className="py-3 px-2 text-center">
+                      <button
+                        onClick={() => handleDeleteSale(sale.id)}
+                        className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-lg transition-all"
+                        title="Eliminar venta"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {sales.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-6 text-center text-slate-450">No hay ventas hoy.</td>
+                    <td colSpan={5} className="py-6 text-center text-slate-450">No hay ventas hoy.</td>
                   </tr>
                 )}
               </tbody>
@@ -393,6 +442,7 @@ export default function Restaurante() {
                   <th className="py-3 px-2">Proveedor</th>
                   <th className="py-3 px-2">Concepto</th>
                   <th className="py-3 px-2 text-right">Valor</th>
+                  <th className="py-3 px-2 text-center">Acción</th>
                 </tr>
               </thead>
               <tbody>
@@ -403,11 +453,20 @@ export default function Restaurante() {
                     <td className="py-3 px-2 text-right font-semibold text-red-600">
                       ${exp.value.toLocaleString()}
                     </td>
+                    <td className="py-3 px-2 text-center">
+                      <button
+                        onClick={() => handleDeleteExpense(exp.id)}
+                        className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-lg transition-all"
+                        title="Eliminar gasto"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {expenses.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="py-6 text-center text-slate-450">No hay gastos hoy.</td>
+                    <td colSpan={4} className="py-6 text-center text-slate-450">No hay gastos hoy.</td>
                   </tr>
                 )}
               </tbody>

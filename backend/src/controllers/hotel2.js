@@ -271,3 +271,14 @@ exports.getTransactions = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener historial.' });
   }
 };
+
+// Transacciones: Eliminar
+exports.deleteTransaction = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.run('DELETE FROM hotel2_transactions WHERE id = ?', [id]);
+    res.json({ message: 'Transacción eliminada con éxito.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar transacción.' });
+  }
+};

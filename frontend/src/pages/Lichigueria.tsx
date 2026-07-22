@@ -8,7 +8,8 @@ import {
   Users, 
   ClipboardList,
   ChevronRight,
-  FileText
+  FileText,
+  Trash2
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -187,6 +188,44 @@ export default function Lichigueria() {
         date: new Date().toISOString().split('T')[0],
         observations: ''
       });
+      fetchData();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteSale = async (id: number) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar esta venta? Se descontará del reporte y balance.')) {
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/api/lichigueria/sales/${id}`, {
+        method: 'DELETE',
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar venta');
+      }
+      fetchData();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteExpense = async (id: number) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este gasto? Se recalcularán los reportes.')) {
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/api/lichigueria/expenses/${id}`, {
+        method: 'DELETE',
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar gasto');
+      }
       fetchData();
     } catch (err: any) {
       alert(err.message);
@@ -420,7 +459,16 @@ export default function Lichigueria() {
                   <h4 className="font-medium text-slate-800">{sale.product}</h4>
                   <span className="text-xs text-slate-400">{sale.quantity} {sale.unit} | {sale.payment_method}</span>
                 </div>
-                <span className="font-semibold text-emerald-600">${sale.value.toLocaleString()}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-emerald-600">${sale.value.toLocaleString()}</span>
+                  <button
+                    onClick={() => handleDeleteSale(sale.id)}
+                    className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-lg transition-all"
+                    title="Eliminar venta"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             ))}
             {sales.length === 0 && (
@@ -442,7 +490,16 @@ export default function Lichigueria() {
                   <h4 className="font-medium text-slate-800">{exp.concept}</h4>
                   <span className="text-xs text-slate-400">{exp.date}</span>
                 </div>
-                <span className="font-semibold text-red-600">${exp.value.toLocaleString()}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-red-600">${exp.value.toLocaleString()}</span>
+                  <button
+                    onClick={() => handleDeleteExpense(exp.id)}
+                    className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-lg transition-all"
+                    title="Eliminar gasto"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             ))}
             {expenses.length === 0 && (

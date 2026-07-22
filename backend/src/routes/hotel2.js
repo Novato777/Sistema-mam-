@@ -12,5 +12,6 @@ router.post('/rooms/:roomId/payment', requireAuth, hotel2Controller.registerPaym
 router.post('/rooms/:roomId/checkout', requireAuth, hotel2Controller.checkoutGuest);
 router.post('/transactions', requireAuth, hotel2Controller.createTransaction);
 router.get('/transactions', requireAuth, hotel2Controller.getTransactions);
+router.delete('/transactions/:id', requireAuth, hotel2Controller.deleteTransaction);
 
 module.exports = router;
