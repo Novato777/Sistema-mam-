@@ -76,16 +76,16 @@ export default function Landing() {
     >
       {/* Imagen de fondo cinematográfica - ALINEADA A LA DERECHA Y DIFUMINADA A LA IZQUIERDA */}
       <div 
-        className="absolute top-0 right-0 z-0 pointer-events-none overflow-hidden h-[750px] md:h-[950px] w-full md:w-[60%] lg:w-[50%]"
+        className="absolute top-0 right-0 left-0 z-0 pointer-events-none overflow-hidden h-[750px] md:h-[950px] w-full"
         style={{
-          maskImage: 'linear-gradient(to left, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
-          WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)'
+          maskImage: 'linear-gradient(to right, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 85%)',
+          WebkitMaskImage: 'linear-gradient(to right, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 85%)'
         }}
       >
         <img 
           src="/fondoPAGE.png" 
           alt="Background Banner" 
-          className="w-full h-full object-cover opacity-60" 
+          className="absolute right-0 top-0 w-full md:w-[60%] lg:w-[50%] h-full object-cover opacity-60" 
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#02040a]/60 to-[#02040a]"></div>
       </div>
