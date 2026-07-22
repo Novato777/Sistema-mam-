@@ -388,7 +388,7 @@ export default function Restaurante() {
             <ClipboardList className="w-5 h-5 text-slate-500" />
             Ventas Recientes
           </h2>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[350px] overflow-y-auto border border-slate-100 rounded-xl pr-1">
             <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 text-slate-400 font-medium">
@@ -435,7 +435,7 @@ export default function Restaurante() {
             <ClipboardList className="w-5 h-5 text-slate-500" />
             Gastos Recientes
           </h2>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[350px] overflow-y-auto border border-slate-100 rounded-xl pr-1">
             <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 text-slate-400 font-medium">

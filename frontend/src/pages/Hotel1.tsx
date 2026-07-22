@@ -70,6 +70,7 @@ export default function Hotel1() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showAddRoomModal, setShowAddRoomModal] = useState(false);
   const [showAddTxModal, setShowAddTxModal] = useState(false);
+  const [showRoomsModal, setShowRoomsModal] = useState(false);
 
   // Formulario Asignación Huésped
   const [guestForm, setGuestForm] = useState({
@@ -405,41 +406,21 @@ export default function Hotel1() {
       )}
 
       {/* Sección Habitaciones */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-slate-800 tracking-tight">Estado de Habitaciones</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {rooms.map((room) => (
-            <button
-              key={room.id}
-              onClick={() => setSelectedRoom(room)}
-              className={`p-5 rounded-2xl border text-left flex flex-col justify-between h-40 transition-all hover:scale-[1.01] hover:shadow-xs active:scale-[0.99] ${
-                room.status === 'Libre'
-                  ? 'bg-white border-slate-200 text-slate-800'
-                  : room.status === 'Ocupada'
-                  ? 'bg-red-50/40 border-red-200 text-red-950'
-                  : 'bg-amber-50/50 border-amber-200 text-amber-950 animate-pulse'
-              }`}
-            >
-              <div className="w-full flex justify-between items-start">
-                <span className="text-2xl font-bold">Hab. {room.number}</span>
-                <span className={`w-3.5 h-3.5 rounded-full border ${
-                  room.status === 'Libre'
-                    ? 'bg-emerald-500 border-emerald-600'
-                    : room.status === 'Ocupada'
-                    ? 'bg-red-500 border-red-600'
-                    : 'bg-amber-500 border-amber-600'
-                }`} />
-              </div>
-              <div className="space-y-1">
-                <span className="text-xs font-semibold text-slate-450 uppercase block">Tarifa diaria</span>
-                <span className="text-lg font-bold">${room.price.toLocaleString()}</span>
-                {room.guest_name && (
-                  <span className="text-xs font-medium block truncate max-w-[130px]">👤 {room.guest_name}</span>
-                )}
-              </div>
-            </button>
-          ))}
+      <div className="bg-white rounded-2xl border border-slate-150/60 shadow-xs p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="space-y-1 text-center sm:text-left">
+          <h2 className="text-lg font-semibold text-slate-800 tracking-tight flex items-center justify-center sm:justify-start gap-2">
+            <Building2 className="w-5 h-5 text-emerald-500" />
+            Estado de Habitaciones
+          </h2>
+          <p className="text-slate-550 text-sm">Administra las habitaciones libres, ocupadas y registra huéspedes.</p>
         </div>
+        <button
+          onClick={() => setShowRoomsModal(true)}
+          className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.98]"
+        >
+          <Building2 className="w-4 h-4" />
+          <span>Ver / Gestionar Habitaciones ({rooms.length})</span>
+        </button>
       </div>
 
       {/* Historial de Transacciones */}
@@ -448,7 +429,7 @@ export default function Hotel1() {
           <ClipboardList className="w-5 h-5 text-slate-500" />
           Historial Financiero Reciente (Hotel 1)
         </h2>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[400px] overflow-y-auto border border-slate-100 rounded-xl pr-1">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
               <tr className="border-b border-slate-100 text-slate-400 font-medium">
@@ -910,6 +891,59 @@ export default function Hotel1() {
                 Guardar Transacción
               </button>
             </form>
+          </div>
+        </div>
+      )}
+      {/* --- MODAL GESTIONAR HABITACIONES --- */}
+      {showRoomsModal && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6 max-h-[85vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900">Estado de Habitaciones</h3>
+                <p className="text-slate-500 text-sm">Selecciona una habitación para ver detalles, realizar check-in, cobros o check-out.</p>
+              </div>
+              <button 
+                onClick={() => setShowRoomsModal(false)} 
+                className="p-1 text-slate-400 bg-slate-100 hover:text-slate-600 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {rooms.map((room) => (
+                <button
+                  key={room.id}
+                  onClick={() => setSelectedRoom(room)}
+                  className={`p-5 rounded-2xl border text-left flex flex-col justify-between h-40 transition-all hover:scale-[1.01] hover:shadow-xs active:scale-[0.99] ${
+                    room.status === 'Libre'
+                      ? 'bg-white border-slate-200 text-slate-800'
+                      : room.status === 'Ocupada'
+                      ? 'bg-red-50/40 border-red-200 text-red-950'
+                      : 'bg-amber-50/50 border-amber-200 text-amber-950 animate-pulse'
+                  }`}
+                >
+                  <div className="w-full flex justify-between items-start">
+                    <span className="text-2xl font-bold">Hab. {room.number}</span>
+                    <span className={`w-3.5 h-3.5 rounded-full border ${
+                      room.status === 'Libre'
+                        ? 'bg-emerald-500 border-emerald-600'
+                        : room.status === 'Ocupada'
+                        ? 'bg-red-500 border-red-600'
+                        : 'bg-amber-500 border-amber-600'
+                    }`} />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-xs font-semibold text-slate-450 uppercase block">Tarifa diaria</span>
+                    <span className="text-lg font-bold">${room.price.toLocaleString()}</span>
+                    {room.guest_name && (
+                      <span className="text-xs font-medium block truncate max-w-[120px]">👤 {room.guest_name}</span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
