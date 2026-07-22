@@ -60,147 +60,151 @@ export default function Landing() {
   )}`;
 
   return (
-    <div 
-      className="min-h-screen text-slate-100 font-sans relative overflow-hidden flex flex-col justify-between selection:bg-indigo-500 selection:text-white"
-      style={{
-        backgroundColor: '#060912',
-        backgroundImage: `
-          radial-gradient(circle at 75% 30%, rgba(99, 102, 241, 0.20), transparent 60%),
-          radial-gradient(circle at 20% 25%, rgba(99, 102, 241, 0.10), transparent 50%),
-          radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.05), transparent 50%),
-          linear-gradient(rgba(255, 255, 255, 0.007) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.007) 1px, transparent 1px)
-        `,
-        backgroundSize: '100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px'
-      }}
-    >
-      {/* Imagen de fondo cinematográfica - ALINEADA A LA DERECHA Y DIFUMINADA A LA IZQUIERDA */}
+    <div className="min-h-screen text-slate-100 font-sans selection:bg-indigo-500 selection:text-white flex flex-col justify-between bg-[#060912]">
+      
+      {/* SECCIÓN SUPERIOR (CONTIENE EL FONDO Y LA IMAGEN QUE SE ESTIRA HASTA EL INICIO DEL FOOTER) */}
       <div 
-        className="absolute top-0 right-0 left-0 z-0 pointer-events-none overflow-hidden h-[750px] md:h-[950px] w-full"
+        className="relative overflow-hidden flex-1 flex flex-col justify-start"
         style={{
-          maskImage: 'linear-gradient(to right, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 85%)',
-          WebkitMaskImage: 'linear-gradient(to right, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 85%)'
+          backgroundImage: `
+            radial-gradient(circle at 75% 30%, rgba(99, 102, 241, 0.20), transparent 60%),
+            radial-gradient(circle at 20% 25%, rgba(99, 102, 241, 0.10), transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.05), transparent 50%),
+            linear-gradient(rgba(255, 255, 255, 0.007) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.007) 1px, transparent 1px)
+          `,
+          backgroundSize: '100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px'
         }}
       >
-        <img 
-          src="/fondoPAGE.png" 
-          alt="Background Banner" 
-          className="absolute right-0 top-0 w-full md:w-[60%] lg:w-[50%] h-full object-cover opacity-60" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-[#060912]/80 to-[#060912] from-0% via-50% via-70% to-80%"></div>
-      </div>
-
-      {/* Luces decorativas de fondo adicionales */}
-      <div className="absolute top-[-10%] left-[-5%] w-[450px] h-[450px] bg-indigo-600/5 rounded-full blur-[130px] -z-10 pointer-events-none"></div>
-
-      {/* Navbar Superior (Transparente sin fondos) */}
-      <header className="max-w-7xl mx-auto w-full px-6 py-6 flex items-center justify-between border-b border-slate-900/30 sticky top-0 bg-transparent z-50">
-        <div className="flex items-center space-x-3">
-          <div className="relative">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-lg blur-xs opacity-75"></div>
-            <img src="/favicon.png" alt="Logo" className="relative w-9 h-9 object-contain rounded-lg border border-slate-700/50 bg-slate-900 shadow-md" />
-          </div>
-          <span className="font-black text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-            SystemPro
-          </span>
-        </div>
-        <Link 
-          to="/login"
-          className="relative group overflow-hidden px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm shadow-lg shadow-indigo-500/25 transition-all active:scale-[0.98] flex items-center space-x-1.5"
+        {/* Imagen de fondo cinematográfica estirada al 100% de la sección superior */}
+        <div 
+          className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
+          style={{
+            maskImage: 'linear-gradient(to right, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 85%)',
+            WebkitMaskImage: 'linear-gradient(to right, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 85%)'
+          }}
         >
-          <span>Ingresar</span>
-          <ArrowRight className="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform" />
-        </Link>
-      </header>
+          <img 
+            src="/fondoPAGE.png" 
+            alt="Background Banner" 
+            className="absolute right-0 top-0 w-full md:w-[60%] lg:w-[50%] h-full object-cover opacity-60" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#060912]/30 to-[#060912] to-95%"></div>
+        </div>
 
-      {/* Hero Section */}
-      <main className="max-w-7xl mx-auto w-full px-6 pt-20 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center relative z-10">
-        
-        {/* Info Izquierda */}
-        <div className="lg:col-span-7 space-y-8">
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-semibold uppercase tracking-widest">
-            <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-            <span>Desarrollo de Software Exclusivo</span>
-          </div>
+        {/* Luces decorativas de fondo adicionales */}
+        <div className="absolute top-[-10%] left-[-5%] w-[450px] h-[450px] bg-indigo-600/5 rounded-full blur-[130px] -z-10 pointer-events-none"></div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Software de Gestión <br />
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent font-black">
-              Altamente Personalizado
+        {/* Navbar Superior (Transparente sin fondos) */}
+        <header className="max-w-7xl mx-auto w-full px-6 py-6 flex items-center justify-between border-b border-slate-900/30 sticky top-0 bg-transparent z-50">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-lg blur-xs opacity-75"></div>
+              <img src="/favicon.png" alt="Logo" className="relative w-9 h-9 object-contain rounded-lg border border-slate-700/50 bg-slate-900 shadow-md" />
+            </div>
+            <span className="font-black text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+              SystemPro
             </span>
-          </h1>
-
-          <p className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl font-medium">
-            Esta plataforma representa un **software desarrollado a medida**, adaptado con precisión milimétrica según los flujos de trabajo, necesidades y requerimientos específicos del cliente. Sin licenciamientos innecesarios, ligero y optimizado para potenciar los negocios familiares en tiempo real.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 pt-2">
-            <Link 
-              to="/login"
-              className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-650 text-white font-bold rounded-2xl text-base shadow-xl shadow-indigo-650/30 transition-all hover:scale-[1.02] active:scale-[0.98] text-center"
-            >
-              Ingresar al Sistema
-            </Link>
-            <div className="inline-flex items-center justify-center space-x-2.5 px-5 py-3 border border-slate-800 bg-slate-900/50 rounded-2xl text-slate-400 text-sm font-semibold select-none">
-              <ShieldCheck className="w-4.5 h-4.5 text-emerald-400" />
-              <span>Acceso Seguro y Encriptado</span>
-            </div>
           </div>
-        </div>
+          <Link 
+            to="/login"
+            className="relative group overflow-hidden px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm shadow-lg shadow-indigo-500/25 transition-all active:scale-[0.98] flex items-center space-x-1.5"
+          >
+            <span>Ingresar</span>
+            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        </header>
 
-        {/* Columna derecha vacía para apreciar la imagen de fondo */}
-        <div className="lg:col-span-5 h-[100px] lg:h-auto"></div>
-      </main>
-
-      {/* Sección de Cards al Fondo (Abajo de la Hero con espaciado equilibrado) */}
-      <section className="max-w-7xl mx-auto w-full px-6 mt-8 mb-24 relative z-10">
-        <h2 className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500 mb-8 text-center lg:text-left">
-          Módulos Integrados del Sistema
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Hero Section */}
+        <main className="max-w-7xl mx-auto w-full px-6 pt-20 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center relative z-10">
           
-          <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-indigo-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(99,102,241,0.05)] group">
-            <div className="p-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl w-fit">
-              <Building2 className="w-6 h-6" />
+          {/* Info Izquierda */}
+          <div className="lg:col-span-7 space-y-8">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-semibold uppercase tracking-widest">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+              <span>Desarrollo de Software Exclusivo</span>
             </div>
-            <h3 className="font-bold text-white text-lg group-hover:text-indigo-400 transition-colors">Módulo Hotelero</h3>
-            <p className="text-slate-400 text-xs leading-relaxed font-medium">
-              Control de habitaciones, asignación de huéspedes, cronograma de próximos pagos y alertas de morosidad en tiempo real.
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+              Software de Gestión <br />
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent font-black">
+                Altamente Personalizado
+              </span>
+            </h1>
+
+            <p className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl font-medium">
+              Esta plataforma representa un **software desarrollado a medida**, adaptado con precisión milimétrica según los flujos de trabajo, necesidades y requerimientos específicos del cliente. Sin licenciamientos innecesarios, ligero y optimizado para potenciar los negocios familiares en tiempo real.
             </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+              <Link 
+                to="/login"
+                className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-650 text-white font-bold rounded-2xl text-base shadow-xl shadow-indigo-650/30 transition-all hover:scale-[1.02] active:scale-[0.98] text-center"
+              >
+                Ingresar al Sistema
+              </Link>
+              <div className="inline-flex items-center justify-center space-x-2.5 px-5 py-3 border border-slate-800 bg-slate-900/50 rounded-2xl text-slate-400 text-sm font-semibold select-none">
+                <ShieldCheck className="w-4.5 h-4.5 text-emerald-400" />
+                <span>Acceso Seguro y Encriptado</span>
+              </div>
+            </div>
           </div>
 
-          <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-rose-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(244,63,94,0.05)] group">
-            <div className="p-3 bg-rose-500/10 text-rose-45 border border-rose-500/20 rounded-2xl w-fit">
-              <UtensilsCrossed className="w-6 h-6" />
-            </div>
-            <h3 className="font-bold text-white text-lg group-hover:text-rose-400 transition-colors">Gastronomía</h3>
-            <p className="text-slate-400 text-xs leading-relaxed font-medium">
-              Ventas rápidas de restaurante, control de métodos de pago (Efectivo/Transferencia) y reporte diario de caja.
-            </p>
-          </div>
+          {/* Columna derecha vacía para apreciar la imagen de fondo */}
+          <div className="lg:col-span-5 h-[100px] lg:h-auto"></div>
+        </main>
 
-          <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-amber-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(245,158,11,0.05)] group">
-            <div className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl w-fit">
-              <Leaf className="w-6 h-6" />
+        {/* Sección de Cards al Fondo (Abajo de la Hero con espaciado equilibrado) */}
+        <section className="max-w-7xl mx-auto w-full px-6 mt-8 mb-24 relative z-10">
+          <h2 className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500 mb-8 text-center lg:text-left">
+            Módulos Integrados del Sistema
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-indigo-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(99,102,241,0.05)] group">
+              <div className="p-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl w-fit">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-white text-lg group-hover:text-indigo-400 transition-colors">Módulo Hotelero</h3>
+              <p className="text-slate-400 text-xs leading-relaxed font-medium">
+                Control de habitaciones, asignación de huéspedes, cronograma de próximos pagos y alertas de morosidad en tiempo real.
+              </p>
             </div>
-            <h3 className="font-bold text-white text-lg group-hover:text-amber-400 transition-colors">Lichiguería</h3>
-            <p className="text-slate-400 text-xs leading-relaxed font-medium">
-              Gestión de proveedores locales, registro por pesaje e inventario simplificado para máxima agilidad comercial.
-            </p>
-          </div>
 
-          <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-emerald-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(16,185,129,0.05)] group">
-            <div className="p-3 bg-emerald-500/10 text-emerald-455 border border-emerald-500/20 rounded-2xl w-fit">
-              <FileText className="w-6 h-6" />
+            <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-rose-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(244,63,94,0.05)] group">
+              <div className="p-3 bg-rose-500/10 text-rose-45 border border-rose-500/20 rounded-2xl w-fit">
+                <UtensilsCrossed className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-white text-lg group-hover:text-rose-400 transition-colors">Gastronomía</h3>
+              <p className="text-slate-400 text-xs leading-relaxed font-medium">
+                Ventas rápidas de restaurante, control de métodos de pago (Efectivo/Transferencia) y reporte diario de caja.
+              </p>
             </div>
-            <h3 className="font-bold text-white text-lg group-hover:text-emerald-400 transition-colors">Reportes PDF</h3>
-            <p className="text-slate-400 text-xs leading-relaxed font-medium">
-              Generación de informes de venta e historiales financieros en formato PDF de alta velocidad, listos para descargar.
-            </p>
-          </div>
 
-        </div>
-      </section>
+            <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-amber-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(245,158,11,0.05)] group">
+              <div className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl w-fit">
+                <Leaf className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-white text-lg group-hover:text-amber-400 transition-colors">Lichiguería</h3>
+              <p className="text-slate-400 text-xs leading-relaxed font-medium">
+                Gestión de proveedores locales, registro por pesaje e inventario simplificado para máxima agilidad comercial.
+              </p>
+            </div>
+
+            <div className="p-6 bg-[#0c101d]/65 backdrop-blur-xs border border-slate-900/80 hover:border-emerald-500/30 rounded-3xl space-y-4 hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_15px_30px_-10px_rgba(16,185,129,0.05)] group">
+              <div className="p-3 bg-emerald-500/10 text-emerald-455 border border-emerald-500/20 rounded-2xl w-fit">
+                <FileText className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-white text-lg group-hover:text-emerald-400 transition-colors">Reportes PDF</h3>
+              <p className="text-slate-400 text-xs leading-relaxed font-medium">
+                Generación de informes de venta e historiales financieros en formato PDF de alta velocidad, listos para descargar.
+              </p>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
 
       {/* FOOTER COPIADO TAL CUAL DE NEXU */}
       <footer className="relative overflow-hidden border-t border-[#1c2740] bg-[#060912]">
