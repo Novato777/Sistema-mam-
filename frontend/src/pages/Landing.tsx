@@ -73,6 +73,16 @@ export default function Landing() {
         backgroundSize: '100% 100%, 100% 100%, 32px 32px, 32px 32px'
       }}
     >
+      {/* Imagen de fondo cinematográfica con opacidad y degradado */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden h-[700px] md:h-[900px]">
+        <img 
+          src="/fondoPAGE.png" 
+          alt="Background Banner" 
+          className="w-full h-full object-cover opacity-[0.16] mix-blend-luminosity" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/70 to-slate-950"></div>
+      </div>
+
       {/* Luces decorativas de fondo adicionales */}
       <div className="absolute top-[-10%] left-[-5%] w-[450px] h-[450px] bg-indigo-600/5 rounded-full blur-[130px] -z-10 pointer-events-none"></div>
 
@@ -97,7 +107,7 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center flex-1">
+      <main className="max-w-7xl mx-auto w-full px-6 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center flex-1 relative z-10">
         
         {/* Info Izquierda */}
         <div className="lg:col-span-6 space-y-8">
