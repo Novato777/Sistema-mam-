@@ -483,7 +483,7 @@ export default function Hotel1() {
       {/* --- MODAL DETALLE HABITACIÓN --- */}
       {selectedRoom && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-2xl font-bold text-slate-900">Habitación {selectedRoom.number}</h3>
@@ -583,7 +583,7 @@ export default function Hotel1() {
       {/* --- MODAL ASIGNAR HUÉSPED --- */}
       {showAssignModal && selectedRoom && (
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-slate-900">Check-in Habitación {selectedRoom.number}</h3>
               <button onClick={() => setShowAssignModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
@@ -665,7 +665,7 @@ export default function Hotel1() {
       {/* --- MODAL REGISTRAR PAGO --- */}
       {showPaymentModal && selectedRoom && (
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-slate-900">Registrar Pago / Abono</h3>
               <button onClick={() => setShowPaymentModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
@@ -721,7 +721,7 @@ export default function Hotel1() {
       {/* --- MODAL CREAR HABITACIÓN --- */}
       {showAddRoomModal && (
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-slate-900">Crear Habitación</h3>
               <button onClick={() => setShowAddRoomModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
@@ -785,7 +785,7 @@ export default function Hotel1() {
       {/* --- MODAL REGISTRAR TRANSACCIÓN MANUAL (Ingreso/Gasto) --- */}
       {showAddTxModal && (
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-slate-900">Registrar Transacción Manual</h3>
               <button onClick={() => setShowAddTxModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
@@ -897,7 +897,7 @@ export default function Hotel1() {
       {/* --- MODAL GESTIONAR HABITACIONES --- */}
       {showRoomsModal && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6 max-h-[85vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 max-h-[85vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-2xl font-bold text-slate-900">Estado de Habitaciones</h3>

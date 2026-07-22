@@ -478,7 +478,7 @@ export default function Restaurante() {
       {/* --- MODAL REGISTRAR VENTA --- */}
       {showSaleModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-slate-900">Registrar Venta</h3>
               <button onClick={() => setShowSaleModal(false)} className="p-1 text-slate-400 bg-slate-100 rounded-lg">
@@ -567,7 +567,7 @@ export default function Restaurante() {
       {/* --- MODAL REGISTRAR GASTO --- */}
       {showExpenseModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-slate-900">Registrar Gasto</h3>
               <button onClick={() => setShowExpenseModal(false)} className="p-1 text-slate-400 bg-slate-100 rounded-lg">
@@ -632,7 +632,7 @@ export default function Restaurante() {
       {/* --- MODAL REPORTES PDF --- */}
       {showPdfModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-slate-900">Reporte Diario PDF</h3>
               <button onClick={() => setShowPdfModal(false)} className="p-1 text-slate-400 bg-slate-100 rounded-lg">
