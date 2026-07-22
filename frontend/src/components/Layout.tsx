@@ -27,7 +27,7 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   const menuItems = [
-    { name: 'Dashboard Principal', path: '/', icon: LayoutDashboard },
+    { name: 'Dashboard Principal', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Hotel 1', path: '/hotel-1', icon: Building2 },
     { name: 'Hotel 2', path: '/hotel-2', icon: Building2 },
     { name: 'Restaurante', path: '/restaurante', icon: UtensilsCrossed },

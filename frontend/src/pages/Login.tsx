@@ -32,7 +32,7 @@ export default function Login() {
       }
 
       localStorage.setItem('token', data.access_token);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Error de conexión con el servidor.');
     } finally {

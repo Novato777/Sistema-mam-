@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Hotel1 from './pages/Hotel1';
@@ -21,11 +22,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Ruta pública de Landing */}
+        <Route path="/" element={<Landing />} />
+        
         <Route path="/login" element={<Login />} />
         
         {/* Rutas Protegidas */}
         <Route 
-          path="/" 
+          path="/dashboard" 
           element={
             <ProtectedRoute>
               <Dashboard />
