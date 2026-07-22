@@ -344,7 +344,7 @@ export default function Lichigueria() {
       <div className="w-full h-2.5 bg-amber-500 rounded-full mb-4 shadow-sm"></div>
 
       {/* Cabecera */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-3">
             <span className="p-2 bg-amber-500 text-white rounded-2xl border border-amber-600 shadow-sm"><Leaf className="w-6 h-6" /></span>
@@ -353,34 +353,34 @@ export default function Lichigueria() {
           <p className="text-slate-655 text-sm">Registro de ventas de legumbres y verduras, proveedores e historial financiero.</p>
         </div>
 
-        <div className="flex flex-wrap gap-3 w-full lg:w-auto">
+        <div className="flex flex-wrap gap-3 w-full xl:w-auto">
           <button
             onClick={() => setShowPdfModal(true)}
             className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <FileText className="w-4 h-4 text-indigo-600" />
-            <span>Generar Reporte PDF</span>
+            <span>Reporte PDF</span>
           </button>
           <button
             onClick={() => setShowProviderModal(true)}
             className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
-            <span>Agregar Proveedor</span>
+            <span>Nuevo Proveedor</span>
           </button>
           <button
             onClick={() => setShowExpenseModal(true)}
             className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
-            <span>Registrar Gasto</span>
+            <span>Nuevo Gasto</span>
           </button>
           <button
             onClick={() => setShowSaleModal(true)}
             className="inline-flex items-center space-x-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
-            <span>Registrar Venta</span>
+            <span>Nueva Venta</span>
           </button>
         </div>
       </div>
