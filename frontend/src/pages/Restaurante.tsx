@@ -244,9 +244,9 @@ export default function Restaurante() {
         startY: 40,
         head: [['Resumen de Caja', 'Valor']],
         body: [
-          ['Total de Ventas (Ingresos)', `$${data.summary.sales.toLocaleString()}`],
-          ['Total de Gastos (Egresos)', `$${data.summary.expenses.toLocaleString()}`],
-          ['Balance del Día', `$${data.summary.balance.toLocaleString()}`]
+          ['Total de Ventas (Ingresos)', `$${Number(data.summary.sales || 0).toLocaleString()}`],
+          ['Total de Gastos (Egresos)', `$${Number(data.summary.expenses || 0).toLocaleString()}`],
+          ['Balance del Día', `$${Number(data.summary.balance || 0).toLocaleString()}`]
         ],
         theme: 'striped',
         headStyles: { fillColor: [249, 115, 22] } // Naranja
@@ -256,9 +256,9 @@ export default function Restaurante() {
       const salesRows = data.sales.map((s: any) => [
         s.product,
         s.quantity,
-        `$${s.value.toLocaleString()}`,
+        `$${Number(s.value || 0).toLocaleString()}`,
         s.payment_method,
-        `$${(s.value * s.quantity).toLocaleString()}`
+        `$${Number((s.value || 0) * (s.quantity || 0)).toLocaleString()}`
       ]);
       doc.text('DETALLE DE VENTAS', 14, (doc as any).lastAutoTable.finalY + 15);
       autoTable(doc, {
@@ -273,7 +273,7 @@ export default function Restaurante() {
       const expenseRows = data.expenses.map((e: any) => [
         e.provider,
         e.concept,
-        `$${e.value.toLocaleString()}`
+        `$${Number(e.value || 0).toLocaleString()}`
       ]);
       doc.text('DETALLE DE GASTOS', 14, (doc as any).lastAutoTable.finalY + 15);
       autoTable(doc, {

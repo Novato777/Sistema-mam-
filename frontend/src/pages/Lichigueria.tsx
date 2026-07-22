@@ -278,14 +278,13 @@ export default function Lichigueria() {
       doc.text(`Generado el: ${new Date().toLocaleString()}`, 14, 32);
 
       // Resumen
-      // Resumen
       autoTable(doc, {
         startY: 40,
         head: [['Resumen de Caja', 'Valor']],
         body: [
-          ['Total de Ventas', `$${data.summary.sales.toLocaleString()}`],
-          ['Total de Gastos/Compras', `$${data.summary.expenses.toLocaleString()}`],
-          ['Balance Neto', `$${data.summary.balance.toLocaleString()}`]
+          ['Total de Ventas', `$${Number(data.summary.sales || 0).toLocaleString()}`],
+          ['Total de Gastos/Compras', `$${Number(data.summary.expenses || 0).toLocaleString()}`],
+          ['Balance Neto', `$${Number(data.summary.balance || 0).toLocaleString()}`]
         ],
         theme: 'striped',
         headStyles: { fillColor: [79, 70, 229] } // Índigo
@@ -295,7 +294,7 @@ export default function Lichigueria() {
       const salesRows = data.sales.map((s: any) => [
         s.product,
         `${s.quantity} ${s.unit}`,
-        `$${s.value.toLocaleString()}`,
+        `$${Number(s.value || 0).toLocaleString()}`,
         s.payment_method
       ]);
       doc.text('DETALLE DE VENTAS', 14, (doc as any).lastAutoTable.finalY + 15);
@@ -310,7 +309,7 @@ export default function Lichigueria() {
       // Gastos
       const expenseRows = data.expenses.map((e: any) => [
         e.concept,
-        `$${e.value.toLocaleString()}`,
+        `$${Number(e.value || 0).toLocaleString()}`,
         e.date
       ]);
       doc.text('DETALLE DE GASTOS / COMPRAS', 14, (doc as any).lastAutoTable.finalY + 15);

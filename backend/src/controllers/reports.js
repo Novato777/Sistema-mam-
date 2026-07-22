@@ -21,8 +21,8 @@ exports.getDailyReport = async (req, res) => {
       );
 
       // Totales
-      const totalSales = sales.reduce((acc, curr) => acc + curr.total, 0);
-      const totalExpenses = expenses.reduce((acc, curr) => acc + curr.value, 0);
+      const totalSales = sales.reduce((acc, curr) => acc + Number(curr.total || 0), 0);
+      const totalExpenses = expenses.reduce((acc, curr) => acc + Number(curr.value || 0), 0);
 
       return res.json({
         date,
@@ -48,8 +48,8 @@ exports.getDailyReport = async (req, res) => {
       );
 
       // Totales
-      const totalSales = sales.reduce((acc, curr) => acc + curr.value, 0);
-      const totalExpenses = expenses.reduce((acc, curr) => acc + curr.value, 0);
+      const totalSales = sales.reduce((acc, curr) => acc + Number(curr.value || 0), 0);
+      const totalExpenses = expenses.reduce((acc, curr) => acc + Number(curr.value || 0), 0);
 
       return res.json({
         date,
