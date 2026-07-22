@@ -60,11 +60,21 @@ export default function Landing() {
   )}`;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans relative overflow-hidden flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
-      {/* Glow effects */}
-      <div className="absolute top-[-10%] left-[-5%] w-[550px] h-[550px] bg-indigo-600/10 rounded-full blur-[140px] -z-10 pointer-events-none"></div>
-      <div className="absolute top-[30%] right-[-10%] w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[140px] -z-10 pointer-events-none"></div>
-      <div className="absolute bottom-[-5%] left-[10%] w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[140px] -z-10 pointer-events-none"></div>
+    <div 
+      className="min-h-screen text-slate-100 font-sans relative overflow-hidden flex flex-col justify-between selection:bg-indigo-500 selection:text-white"
+      style={{
+        backgroundColor: '#02040a',
+        backgroundImage: `
+          radial-gradient(circle at 20% 25%, rgba(99, 102, 241, 0.12), transparent 50%),
+          radial-gradient(circle at 80% 60%, rgba(16, 185, 129, 0.07), transparent 50%),
+          linear-gradient(rgba(255, 255, 255, 0.007) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.007) 1px, transparent 1px)
+        `,
+        backgroundSize: '100% 100%, 100% 100%, 32px 32px, 32px 32px'
+      }}
+    >
+      {/* Luces decorativas de fondo adicionales */}
+      <div className="absolute top-[-10%] left-[-5%] w-[450px] h-[450px] bg-indigo-600/5 rounded-full blur-[130px] -z-10 pointer-events-none"></div>
 
       {/* Navbar Superior */}
       <header className="max-w-7xl mx-auto w-full px-6 py-6 flex items-center justify-between border-b border-slate-900/60 sticky top-0 bg-slate-950/70 backdrop-blur-md z-50">

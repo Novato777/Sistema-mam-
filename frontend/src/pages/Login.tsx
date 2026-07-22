@@ -41,10 +41,21 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans relative overflow-hidden flex flex-col items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
-      {/* Luces decorativas de fondo */}
-      <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-indigo-650/10 rounded-full blur-[140px] -z-10 pointer-events-none"></div>
-      <div className="absolute bottom-[-15%] right-[-10%] w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[140px] -z-10 pointer-events-none"></div>
+    <div 
+      className="min-h-screen text-slate-100 font-sans relative overflow-hidden flex flex-col items-center justify-center p-4 selection:bg-indigo-500 selection:text-white"
+      style={{
+        backgroundColor: '#02040a',
+        backgroundImage: `
+          radial-gradient(circle at 50% 40%, rgba(99, 102, 241, 0.14), transparent 60%),
+          radial-gradient(circle at 10% 90%, rgba(16, 185, 129, 0.08), transparent 50%),
+          linear-gradient(rgba(255, 255, 255, 0.007) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.007) 1px, transparent 1px)
+        `,
+        backgroundSize: '100% 100%, 100% 100%, 32px 32px, 32px 32px'
+      }}
+    >
+      {/* Luces decorativas de fondo adicionales */}
+      <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-indigo-600/5 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
 
       {/* Botón para volver al Inicio (Landing) */}
       <Link 
