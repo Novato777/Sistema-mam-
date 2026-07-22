@@ -248,8 +248,8 @@ export default function Dashboard() {
             legend={
               <div className="space-y-1 text-[11px] leading-tight">
                 <div className="text-slate-450 font-bold uppercase tracking-wider text-[9px]">Ventas de hoy</div>
-                <div className="text-slate-850 font-extrabold text-base truncate">${salesToday.toLocaleString()}</div>
-                <div className="text-slate-400 text-[10px]">Meta: ${target.toLocaleString()}</div>
+                <div className="text-slate-850 font-extrabold text-base truncate">${Number(salesToday || 0).toLocaleString('de-DE')}</div>
+                <div className="text-slate-400 text-[10px]">Meta: ${Number(target || 0).toLocaleString('de-DE')}</div>
               </div>
             }
           />
@@ -281,8 +281,8 @@ export default function Dashboard() {
             legend={
               <div className="space-y-1 text-[11px] leading-tight">
                 <div className="text-slate-450 font-bold uppercase tracking-wider text-[9px]">Ventas de hoy</div>
-                <div className="text-slate-850 font-extrabold text-base truncate">${salesToday.toLocaleString()}</div>
-                <div className="text-slate-400 text-[10px]">Meta: ${target.toLocaleString()}</div>
+                <div className="text-slate-850 font-extrabold text-base truncate">${Number(salesToday || 0).toLocaleString('de-DE')}</div>
+                <div className="text-slate-400 text-[10px]">Meta: ${Number(target || 0).toLocaleString('de-DE')}</div>
               </div>
             }
           />

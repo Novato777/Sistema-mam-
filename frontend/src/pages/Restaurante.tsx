@@ -346,11 +346,11 @@ export default function Restaurante() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-              Ventas del día
+              Ventas de hoy
               <span className="inline-flex p-1 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${dashboard.today.sales.toLocaleString()}</span>
+              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.today.sales || 0).toLocaleString('de-DE')}</span>
               <span className="text-xs text-slate-400">Hoy</span>
             </div>
           </div>
@@ -361,7 +361,7 @@ export default function Restaurante() {
               <span className="inline-flex p-1 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${dashboard.month.sales.toLocaleString()}</span>
+              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.month.sales || 0).toLocaleString('de-DE')}</span>
               <span className="text-xs text-slate-400">Mes actual</span>
             </div>
           </div>
@@ -372,8 +372,8 @@ export default function Restaurante() {
               <span className="inline-flex p-1 bg-orange-50 text-orange-600 rounded-lg"><DollarSign className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${dashboard.month.balance.toLocaleString()}</span>
-              <span className="text-xs text-slate-550">Gastos mes: ${dashboard.month.expense.toLocaleString()}</span>
+              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.month.balance || 0).toLocaleString('de-DE')}</span>
+              <span className="text-xs text-slate-550 font-medium">Gastos mes: ${Number(dashboard.month.expense || 0).toLocaleString('de-DE')}</span>
             </div>
           </div>
         </div>
@@ -406,7 +406,7 @@ export default function Restaurante() {
                     <td className="py-3 px-2 text-slate-500">x{sale.quantity}</td>
                     <td className="py-3 px-2 text-slate-500 text-xs">{sale.payment_method}</td>
                     <td className="py-3 px-2 text-right font-semibold text-emerald-600">
-                      ${sale.total.toLocaleString()}
+                      ${Number(sale.total || 0).toLocaleString('de-DE')}
                     </td>
                     <td className="py-3 px-2 text-center">
                       <button
@@ -451,7 +451,7 @@ export default function Restaurante() {
                     <td className="py-3 px-2 font-medium text-slate-800">{exp.provider}</td>
                     <td className="py-3 px-2 text-slate-500 max-w-[130px] truncate">{exp.concept}</td>
                     <td className="py-3 px-2 text-right font-semibold text-red-600">
-                      ${exp.value.toLocaleString()}
+                      ${Number(exp.value || 0).toLocaleString('de-DE')}
                     </td>
                     <td className="py-3 px-2 text-center">
                       <button

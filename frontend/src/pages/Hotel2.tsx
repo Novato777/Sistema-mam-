@@ -357,12 +357,12 @@ export default function Hotel2() {
 
           <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-              Ingresos de hoy
+              Ingresos del día
               <span className="inline-flex p-1 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
               <span className="text-3xl font-bold text-slate-800">
-                ${dashboard.today.income.toLocaleString()}
+                ${Number(dashboard.today.income || 0).toLocaleString('de-DE')}
               </span>
               <span className="text-xs text-slate-400">Total recibido hoy</span>
             </div>
@@ -375,7 +375,7 @@ export default function Hotel2() {
             </span>
             <div className="flex items-baseline justify-between">
               <span className="text-3xl font-bold text-slate-800">
-                ${dashboard.today.expense.toLocaleString()}
+                ${Number(dashboard.today.expense || 0).toLocaleString('de-DE')}
               </span>
               <span className="text-xs text-slate-400">Total egresado hoy</span>
             </div>
@@ -385,10 +385,10 @@ export default function Hotel2() {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Balance Mensual</span>
             <div className="flex items-baseline justify-between">
               <span className="text-3xl font-bold text-slate-800">
-                ${dashboard.month.balance.toLocaleString()}
+                ${Number(dashboard.month.balance || 0).toLocaleString('de-DE')}
               </span>
-              <span className="text-xs text-slate-500">
-                Ing: ${dashboard.month.income.toLocaleString()} | Gas: ${dashboard.month.expense.toLocaleString()}
+              <span className="text-xs text-slate-550 font-medium">
+                Ing: ${Number(dashboard.month.income || 0).toLocaleString('de-DE')} | Gas: ${Number(dashboard.month.expense || 0).toLocaleString('de-DE')}
               </span>
             </div>
           </div>
@@ -446,7 +446,7 @@ export default function Hotel2() {
                   <td className={`py-3.5 px-2 text-right font-semibold ${
                     tx.type === 'Ingreso' ? 'text-emerald-600' : 'text-red-600'
                   }`}>
-                    ${tx.amount.toLocaleString()}
+                    ${Number(tx.amount || 0).toLocaleString('de-DE')}
                   </td>
                   <td className="py-3.5 px-2 text-center">
                     <button
@@ -475,7 +475,7 @@ export default function Hotel2() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-2xl font-bold text-slate-900">Habitación {selectedRoom.number}</h3>
-                <span className="text-sm text-slate-500">Tarifa: ${selectedRoom.price.toLocaleString()} / día</span>
+                <span className="text-sm text-slate-500 font-medium">Tarifa: ${Number(selectedRoom.price || 0).toLocaleString('de-DE')} / día</span>
               </div>
               <button onClick={() => setSelectedRoom(null)} className="p-1 text-slate-400 bg-slate-100 hover:text-slate-650 rounded-lg">
                 <X className="w-5 h-5" />
@@ -670,7 +670,7 @@ export default function Hotel2() {
                       setPaymentAmount(formatted);
                     }
                   }}
-                  placeholder={`Tarifa sugerida: $${selectedRoom.price.toLocaleString()}`}
+                  placeholder={`Tarifa sugerida: $${Number(selectedRoom.price || 0).toLocaleString('de-DE')}`}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
                 />
               </div>
@@ -917,7 +917,7 @@ export default function Hotel2() {
                   </div>
                   <div className="space-y-1">
                     <span className="text-xs font-semibold text-slate-450 uppercase block">Tarifa diaria</span>
-                    <span className="text-lg font-bold">${room.price.toLocaleString()}</span>
+                    <span className="text-lg font-bold">${Number(room.price || 0).toLocaleString('de-DE')}</span>
                     {room.guest_name && (
                       <span className="text-xs font-medium block truncate max-w-[120px]">👤 {room.guest_name}</span>
                     )}

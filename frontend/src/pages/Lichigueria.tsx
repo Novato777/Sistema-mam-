@@ -394,7 +394,7 @@ export default function Lichigueria() {
               <span className="inline-flex p-1 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${dashboard.today.sales.toLocaleString()}</span>
+              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.today.sales || 0).toLocaleString('de-DE')}</span>
               <span className="text-xs text-slate-400">Hoy</span>
             </div>
           </div>
@@ -405,7 +405,7 @@ export default function Lichigueria() {
               <span className="inline-flex p-1 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${dashboard.month.sales.toLocaleString()}</span>
+              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.month.sales || 0).toLocaleString('de-DE')}</span>
               <span className="text-xs text-slate-400">Mes actual</span>
             </div>
           </div>
@@ -413,8 +413,8 @@ export default function Lichigueria() {
           <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Balance Mensual</span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${dashboard.month.balance.toLocaleString()}</span>
-              <span className="text-xs text-slate-500">Gastos mes: ${dashboard.month.expense.toLocaleString()}</span>
+              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.month.balance || 0).toLocaleString('de-DE')}</span>
+              <span className="text-xs text-slate-500">Gastos mes: ${Number(dashboard.month.expense || 0).toLocaleString('de-DE')}</span>
             </div>
           </div>
         </div>
@@ -459,7 +459,7 @@ export default function Lichigueria() {
                   <span className="text-xs text-slate-400">{sale.quantity} {sale.unit} | {sale.payment_method}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-emerald-600">${sale.value.toLocaleString()}</span>
+                  <span className="font-semibold text-emerald-600">${Number(sale.value || 0).toLocaleString('de-DE')}</span>
                   <button
                     onClick={() => handleDeleteSale(sale.id)}
                     className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-lg transition-all"
@@ -490,7 +490,7 @@ export default function Lichigueria() {
                   <span className="text-xs text-slate-400">{exp.date}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-red-600">${exp.value.toLocaleString()}</span>
+                  <span className="font-semibold text-red-600">${Number(exp.value || 0).toLocaleString('de-DE')}</span>
                   <button
                     onClick={() => handleDeleteExpense(exp.id)}
                     className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-lg transition-all"
