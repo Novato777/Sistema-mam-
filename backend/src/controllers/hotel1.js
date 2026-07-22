@@ -29,7 +29,7 @@ const checkAndUpdatePaymentStatus = async () => {
 
     for (const guest of expiredGuests) {
       // Cambiar estado a 'Pendiente de pago'
-      await db.run('UPDATE hotel1_rooms SET status = "Pendiente de pago" WHERE id = ?', [guest.room_id]);
+      await db.run("UPDATE hotel1_rooms SET status = 'Pendiente de pago' WHERE id = ?", [guest.room_id]);
     }
   } catch (error) {
     console.error('Error al verificar vencimientos de pago del Hotel 1:', error);
@@ -48,18 +48,18 @@ exports.getDashboard = async (req, res) => {
 
     // 1. Habitaciones
     const roomsCount = await db.get('SELECT COUNT(*) as total FROM hotel1_rooms');
-    const occupiedCount = await db.get('SELECT COUNT(*) as occupied FROM hotel1_rooms WHERE status IN ("Ocupada", "Pendiente de pago")');
+    const occupiedCount = await db.get("SELECT COUNT(*) as occupied FROM hotel1_rooms WHERE status IN ('Ocupada', 'Pendiente de pago')");
     const freeCount = (roomsCount.total || 0) - (occupiedCount.occupied || 0);
 
     // 2. Dinero Recibido Hoy (Ingresos)
-    const incomeToday = await db.get('SELECT SUM(amount) as sum FROM hotel1_transactions WHERE type = "Ingreso" AND date = ?', [today]);
+    const incomeToday = await db.get("SELECT SUM(amount) as sum FROM hotel1_transactions WHERE type = 'Ingreso' AND date = ?", [today]);
 
     // 3. Gastos del Día
-    const expensesToday = await db.get('SELECT SUM(amount) as sum FROM hotel1_transactions WHERE type = "Gasto" AND date = ?', [today]);
+    const expensesToday = await db.get("SELECT SUM(amount) as sum FROM hotel1_transactions WHERE type = 'Gasto' AND date = ?", [today]);
 
     // 4. Reportes del mes (Ingresos y Gastos del mes)
-    const incomeMonth = await db.get('SELECT SUM(amount) as sum FROM hotel1_transactions WHERE type = "Ingreso" AND date LIKE ?', [`${currentMonth}%`]);
-    const expensesMonth = await db.get('SELECT SUM(amount) as sum FROM hotel1_transactions WHERE type = "Gasto" AND date LIKE ?', [`${currentMonth}%`]);
+    const incomeMonth = await db.get("SELECT SUM(amount) as sum FROM hotel1_transactions WHERE type = 'Ingreso' AND date LIKE ?", [`${currentMonth}%`]);
+    const expensesMonth = await db.get("SELECT SUM(amount) as sum FROM hotel1_transactions WHERE type = 'Gasto' AND date LIKE ?", [`${currentMonth}%`]);
 
     res.json({
       rooms: {
@@ -115,7 +115,7 @@ exports.createRoom = async (req, res) => {
     );
     res.status(201).json({ id: result.id, number, price, status: 'Libre', observations });
   } catch (error) {
-    if (error.message.includes('UNIQUE')) {
+    if (error.message && error.message.toUpperCase().includes('UNIQUE')) {
       return res.status(400).json({ error: 'El número de habitación ya existe.' });
     }
     res.status(500).json({ error: 'Error al crear habitación.' });
@@ -185,11 +185,11 @@ exports.assignGuest = async (req, res) => {
     );
 
     // Actualizar estado de la habitación
-    await db.run('UPDATE hotel1_rooms SET status = "Ocupada" WHERE id = ?', [roomId]);
+    await db.run("UPDATE hotel1_rooms SET status = 'Ocupada' WHERE id = ?", [roomId]);
 
     // Registrar ingreso por el hospedaje inicial
     await db.run(
-      'INSERT INTO hotel1_transactions (type, category, amount, date, description) VALUES ("Ingreso", "Hospedaje", ?, ?, ?)',
+      "INSERT INTO hotel1_transactions (type, category, amount, date, description) VALUES ('Ingreso', 'Hospedaje', ?, ?, ?)",
       [room.price, checkInDate, `Check-in Huésped: ${name} (Hab. ${room.number})`]
     );
 
@@ -237,11 +237,11 @@ exports.registerPayment = async (req, res) => {
     await db.run('UPDATE hotel1_guests SET next_payment_date = ? WHERE room_id = ?', [nextPaymentStr, roomId]);
 
     // Regresar estado de la habitación a 'Ocupada' si estaba en 'Pendiente de pago'
-    await db.run('UPDATE hotel1_rooms SET status = "Ocupada" WHERE id = ?', [roomId]);
+    await db.run("UPDATE hotel1_rooms SET status = 'Ocupada' WHERE id = ?", [roomId]);
 
     // Registrar la transacción de ingreso
     await db.run(
-      'INSERT INTO hotel1_transactions (type, category, amount, date, description) VALUES ("Ingreso", "Hospedaje", ?, ?, ?)',
+      "INSERT INTO hotel1_transactions (type, category, amount, date, description) VALUES ('Ingreso', 'Hospedaje', ?, ?, ?)",
       [amount, transactionDate, `Abono/Pago de hospedaje: ${guest.name} (Hab. ${room.number})`]
     );
 
@@ -265,8 +265,8 @@ exports.checkoutGuest = async (req, res) => {
     // Eliminar huésped
     await db.run('DELETE FROM hotel1_guests WHERE room_id = ?', [roomId]);
 
-    // Cambiar estado a Libre
-    await db.run('UPDATE hotel1_rooms SET status = "Libre" WHERE id = ?', [roomId]);
+    // Liberar la habitación
+    await db.run("UPDATE hotel1_rooms SET status = 'Libre' WHERE id = ?", [roomId]);
 
     res.json({ message: 'Habitación liberada con éxito.' });
   } catch (error) {
