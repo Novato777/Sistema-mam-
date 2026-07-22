@@ -919,7 +919,14 @@ export default function Hotel2() {
                     <span className="text-xs font-semibold text-slate-450 uppercase block">Tarifa diaria</span>
                     <span className="text-lg font-bold">${Number(room.price || 0).toLocaleString('de-DE')}</span>
                     {room.guest_name && (
-                      <span className="text-xs font-medium block truncate max-w-[120px]">👤 {room.guest_name}</span>
+                      <div className="flex flex-col space-y-1 mt-1.5">
+                        <span className="text-xs font-medium block truncate max-w-[120px]">👤 {room.guest_name}</span>
+                        {room.status === 'Ocupada' ? (
+                          <span className="inline-flex items-center text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-md self-start">Al día</span>
+                        ) : (
+                          <span className="inline-flex items-center text-[9px] font-bold text-red-655 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-md self-start animate-pulse">Debe pago</span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </button>
