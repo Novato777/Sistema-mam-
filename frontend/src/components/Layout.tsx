@@ -165,8 +165,8 @@ export default function Layout({ children }: LayoutProps) {
             </button>
             <h2 className="font-semibold text-slate-850 text-base">{currentModule}</h2>
           </div>
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-sm">
-            A
+          <div className="w-8 h-8 rounded-lg overflow-hidden border border-slate-150 shadow-2xs">
+            <img src="/favicon.png" alt="Admin Logo" className="w-full h-full object-cover" />
           </div>
         </header>
  
