@@ -153,12 +153,12 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Área de contenido principal */}
       <div className={`flex-1 flex flex-col min-w-0 overflow-hidden transition-all duration-300 ${
-        location.pathname === '/hotel-1' ? 'bg-emerald-100/40' :
-        location.pathname === '/hotel-2' ? 'bg-teal-100/40' :
-        location.pathname === '/restaurante' ? 'bg-rose-100/40' :
-        location.pathname === '/lichigueria' ? 'bg-amber-100/45' :
+        location.pathname === '/hotel-1' ? 'bg-emerald-50/30' :
+        location.pathname === '/hotel-2' ? 'bg-teal-50/30' :
+        location.pathname === '/restaurante' ? 'bg-rose-50/30' :
+        location.pathname === '/lichigueria' ? 'bg-amber-50/30' :
         location.pathname === '/' ? 'bg-slate-100' :
-        'bg-slate-100'
+        'bg-slate-50'
       }`}>
         {/* Header móvil */}
         <header className="md:hidden flex items-center justify-between bg-white border-b border-slate-100 px-6 py-4">
