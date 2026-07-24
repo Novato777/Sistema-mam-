@@ -8,6 +8,7 @@ router.get('/dashboard', requireAuth, hotel1Controller.getDashboard);
 router.get('/rooms', requireAuth, hotel1Controller.getRooms);
 router.post('/rooms', requireAuth, hotel1Controller.createRoom);
 router.get('/rooms/:id', requireAuth, hotel1Controller.getRoomDetail);
+router.put('/rooms/:id', requireAuth, hotel1Controller.updateRoom);
 router.post('/rooms/:roomId/guest', requireAuth, hotel1Controller.assignGuest);
 router.post('/rooms/:roomId/payment', requireAuth, hotel1Controller.registerPayment);
 router.post('/rooms/:roomId/checkout', requireAuth, hotel1Controller.checkoutGuest);

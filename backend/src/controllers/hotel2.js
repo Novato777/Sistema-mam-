@@ -1,16 +1,5 @@
 const db = require('../config/db');
-
-const formatDate = (date) => {
-  return date.toISOString().split('T')[0];
-};
-
-const getTodayString = () => {
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+const { getTodayString, formatDate } = require('../utils/date');
 
 const checkAndUpdatePaymentStatus = async () => {
   try {
@@ -123,6 +112,54 @@ exports.getRoomDetail = async (req, res) => {
     res.json(room);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener detalle de la habitación en Hotel 2.' });
+  }
+};
+
+exports.updateRoom = async (req, res) => {
+  const { id } = req.params;
+  const { number, price, observations, guest_name, guest_document, guest_phone, payment_type, next_payment_date } = req.body;
+
+  if (!number || price === undefined || price === null || price === '') {
+    return res.status(400).json({ error: 'Número de habitación y precio son obligatorios.' });
+  }
+
+  try {
+    const existingRoom = await db.get('SELECT * FROM hotel2_rooms WHERE id = ?', [id]);
+    if (!existingRoom) {
+      return res.status(404).json({ error: 'Habitación no encontrada.' });
+    }
+
+    // Actualizar habitación
+    await db.run(
+      'UPDATE hotel2_rooms SET number = ?, price = ?, observations = ? WHERE id = ?',
+      [number, price, observations || '', id]
+    );
+
+    // Verificar si hay un huésped en la habitación
+    const existingGuest = await db.get('SELECT * FROM hotel2_guests WHERE room_id = ?', [id]);
+    if (existingGuest && guest_name) {
+      const today = getTodayString();
+      const updatedNextPayment = next_payment_date || existingGuest.next_payment_date;
+
+      await db.run(
+        'UPDATE hotel2_guests SET name = ?, document = ?, phone = ?, payment_type = ?, next_payment_date = ? WHERE room_id = ?',
+        [guest_name, guest_document || '', guest_phone || '', payment_type || existingGuest.payment_type, updatedNextPayment, id]
+      );
+
+      if (updatedNextPayment < today) {
+        await db.run("UPDATE hotel2_rooms SET status = 'Pendiente de pago' WHERE id = ?", [id]);
+      } else {
+        await db.run("UPDATE hotel2_rooms SET status = 'Ocupada' WHERE id = ?", [id]);
+      }
+    }
+
+    res.json({ message: 'Información de habitación y huésped actualizada con éxito en Hotel 2.' });
+  } catch (error) {
+    if (error.message && error.message.toUpperCase().includes('UNIQUE')) {
+      return res.status(400).json({ error: 'El número de habitación ya existe.' });
+    }
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar habitación en Hotel 2.' });
   }
 };
 

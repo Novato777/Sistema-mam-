@@ -14,10 +14,12 @@ import {
   AlertTriangle,
   ArrowRight,
   ClipboardList,
-  Trash2
+  Trash2,
+  Pencil
 } from 'lucide-react';
 
 import API_URL from '../config/api';
+import { getTodayString } from '../utils/date';
 
 interface Guest {
   name: string;
@@ -71,19 +73,32 @@ export default function Hotel1() {
   const [showAddRoomModal, setShowAddRoomModal] = useState(false);
   const [showAddTxModal, setShowAddTxModal] = useState(false);
   const [showRoomsModal, setShowRoomsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  // Formulario Editar Habitación y Huésped
+  const [editForm, setEditForm] = useState({
+    number: '',
+    price: '',
+    observations: '',
+    guest_name: '',
+    guest_document: '',
+    guest_phone: '',
+    payment_type: 'Pago diario',
+    next_payment_date: getTodayString()
+  });
 
   // Formulario Asignación Huésped
   const [guestForm, setGuestForm] = useState({
     name: '',
     document: '',
     phone: '',
-    checkInDate: new Date().toISOString().split('T')[0],
+    checkInDate: getTodayString(),
     paymentType: 'Pago diario'
   });
 
   // Formulario Registrar Pago
   const [paymentAmount, setPaymentAmount] = useState('');
-  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [paymentDate, setPaymentDate] = useState(getTodayString());
 
   // Formulario Crear Habitación
   const [roomForm, setRoomForm] = useState({
@@ -97,7 +112,7 @@ export default function Hotel1() {
     type: 'Gasto',
     category: 'Mercado',
     amount: '',
-    date: new Date().toISOString().split('T')[0],
+    date: getTodayString(),
     description: ''
   });
 
@@ -160,7 +175,7 @@ export default function Hotel1() {
         name: '',
         document: '',
         phone: '',
-        checkInDate: new Date().toISOString().split('T')[0],
+        checkInDate: getTodayString(),
         paymentType: 'Pago diario'
       });
       fetchData();
@@ -194,6 +209,57 @@ export default function Hotel1() {
       setShowPaymentModal(false);
       setSelectedRoom(null);
       setPaymentAmount('');
+      fetchData();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const openEditModal = (room: Room) => {
+    setSelectedRoom(room);
+    setEditForm({
+      number: room.number,
+      price: room.price ? Number(room.price).toLocaleString('de-DE') : '',
+      observations: room.observations || '',
+      guest_name: room.guest_name || '',
+      guest_document: room.guest_document || '',
+      guest_phone: room.guest_phone || '',
+      payment_type: room.payment_type || 'Pago diario',
+      next_payment_date: room.next_payment_date || getTodayString()
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedRoom) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/hotel-1/rooms/${selectedRoom.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          number: editForm.number,
+          price: parseFloat(editForm.price.replace(/\./g, '')),
+          observations: editForm.observations,
+          guest_name: editForm.guest_name,
+          guest_document: editForm.guest_document,
+          guest_phone: editForm.guest_phone,
+          payment_type: editForm.payment_type,
+          next_payment_date: editForm.next_payment_date
+        })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Error al actualizar habitación');
+      }
+
+      setShowEditModal(false);
+      setSelectedRoom(null);
       fetchData();
     } catch (err: any) {
       alert(err.message);
@@ -278,7 +344,7 @@ export default function Hotel1() {
         type: 'Gasto',
         category: 'Mercado',
         amount: '',
-        date: new Date().toISOString().split('T')[0],
+        date: getTodayString(),
         description: ''
       });
       fetchData();
@@ -326,24 +392,24 @@ export default function Hotel1() {
       {/* Cabecera */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-3">
             <span className="p-2 bg-emerald-500 text-white rounded-2xl border border-emerald-600 shadow-sm"><Building2 className="w-6 h-6" /></span>
             Hotel 1
           </h1>
-          <p className="text-slate-655 text-sm">Dashboard operativo y control de habitaciones.</p>
+          <p className="text-slate-655 dark:text-slate-400 text-sm">Dashboard operativo y control de habitaciones.</p>
         </div>
 
         <div className="flex gap-3">
           <button
             onClick={() => setShowAddRoomModal(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Crear Habitación</span>
           </button>
           <button
             onClick={() => setShowAddTxModal(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Registrar Transacción</span>
@@ -354,50 +420,50 @@ export default function Hotel1() {
       {/* Métricas del Dashboard */}
       {dashboard && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Habitaciones</span>
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Habitaciones</span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">{dashboard.rooms.total}</span>
-              <div className="text-xs font-medium space-x-2 text-slate-500">
-                <span className="text-emerald-600">🟢 {dashboard.rooms.free} Libres</span>
-                <span className="text-red-500">🔴 {dashboard.rooms.occupied} Ocup.</span>
+              <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">{dashboard.rooms.total}</span>
+              <div className="text-xs font-medium space-x-2 text-slate-500 dark:text-slate-400">
+                <span className="text-emerald-600 dark:text-emerald-400">🟢 {dashboard.rooms.free} Libres</span>
+                <span className="text-red-500 dark:text-red-400">🔴 {dashboard.rooms.occupied} Ocup.</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
               Ingresos de hoy
-              <span className="inline-flex p-1 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
+              <span className="inline-flex p-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">
+              <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                 ${Number(dashboard.today.income || 0).toLocaleString('de-DE')}
               </span>
               <span className="text-xs text-slate-400">Total recibido hoy</span>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
               Gastos del día
-              <span className="inline-flex p-1 bg-red-50 text-red-600 rounded-lg"><TrendingDown className="w-3.5 h-3.5" /></span>
+              <span className="inline-flex p-1 bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 rounded-lg"><TrendingDown className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">
+              <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                 ${Number(dashboard.today.expense || 0).toLocaleString('de-DE')}
               </span>
               <span className="text-xs text-slate-400">Total egresado hoy</span>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Balance Mensual</span>
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Balance Mensual</span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">
+              <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                 ${Number(dashboard.month.balance || 0).toLocaleString('de-DE')}
               </span>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 Ing: ${Number(dashboard.month.income || 0).toLocaleString('de-DE')} | Gas: ${Number(dashboard.month.expense || 0).toLocaleString('de-DE')}
               </span>
             </div>
@@ -406,13 +472,13 @@ export default function Hotel1() {
       )}
 
       {/* Sección Habitaciones */}
-      <div className="bg-white rounded-2xl border border-slate-150/60 shadow-xs p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="space-y-1 text-center sm:text-left">
-          <h2 className="text-lg font-semibold text-slate-800 tracking-tight flex items-center justify-center sm:justify-start gap-2">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 tracking-tight flex items-center justify-center sm:justify-start gap-2">
             <Building2 className="w-5 h-5 text-emerald-500" />
             Estado de Habitaciones
           </h2>
-          <p className="text-slate-550 text-sm">Administra las habitaciones libres, ocupadas y registra huéspedes.</p>
+          <p className="text-slate-550 dark:text-slate-400 text-sm">Administra las habitaciones libres, ocupadas y registra huéspedes.</p>
         </div>
         <button
           onClick={() => setShowRoomsModal(true)}
@@ -424,15 +490,15 @@ export default function Hotel1() {
       </div>
 
       {/* Historial de Transacciones */}
-      <div className="bg-white rounded-2xl border border-slate-150/60 shadow-xs p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-slate-800 tracking-tight flex items-center gap-2">
-          <ClipboardList className="w-5 h-5 text-slate-500" />
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
+          <ClipboardList className="w-5 h-5 text-slate-500 dark:text-slate-400" />
           Historial Financiero Reciente (Hotel 1)
         </h2>
-        <div className="overflow-x-auto max-h-[400px] overflow-y-auto border border-slate-100 rounded-xl pr-1">
+        <div className="overflow-x-auto max-h-[400px] overflow-y-auto border border-slate-100 dark:border-slate-800 rounded-xl pr-1">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 text-slate-400 font-medium">
+              <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-400 font-medium">
                 <th className="py-3 px-2">Fecha</th>
                 <th className="py-3 px-2">Tipo</th>
                 <th className="py-3 px-2">Categoría</th>
@@ -443,16 +509,16 @@ export default function Hotel1() {
             </thead>
             <tbody>
               {transactions.map((tx) => (
-                <tr key={tx.id} className="border-b border-slate-50 hover:bg-slate-50/50">
-                  <td className="py-3.5 px-2 text-slate-500">{tx.date}</td>
+                <tr key={tx.id} className="border-b border-slate-50 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                  <td className="py-3.5 px-2 text-slate-500 dark:text-slate-400">{tx.date}</td>
                   <td className="py-3.5 px-2">
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                      tx.type === 'Ingreso' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                      tx.type === 'Ingreso' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400' : 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400'
                     }`}>
                       {tx.type}
                     </span>
                   </td>
-                  <td className="py-3.5 px-2 text-slate-700 font-medium">{tx.category}</td>
+                  <td className="py-3.5 px-2 text-slate-700 dark:text-slate-200 font-medium">{tx.category}</td>
                   <td className="py-3.5 px-2 text-slate-500 max-w-xs truncate">{tx.description || '-'}</td>
                   <td className={`py-3.5 px-2 text-right font-semibold ${
                     tx.type === 'Ingreso' ? 'text-emerald-600' : 'text-red-600'
@@ -519,13 +585,19 @@ export default function Hotel1() {
             </div>
 
             {selectedRoom.status === 'Libre' ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <p className="text-sm text-slate-500">La habitación está lista. Puedes realizar el Check-in para asignarla a un huésped.</p>
                 <button
                   onClick={() => setShowAssignModal(true)}
                   className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
                 >
                   Asignar Huésped (Check-in)
+                </button>
+                <button
+                  onClick={() => openEditModal(selectedRoom)}
+                  className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-sm transition-all flex items-center justify-center gap-2"
+                >
+                  <Pencil className="w-4 h-4" /> Editar Habitación
                 </button>
               </div>
             ) : (
@@ -560,18 +632,26 @@ export default function Hotel1() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="space-y-2 pt-2">
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setShowPaymentModal(true)}
+                      className="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
+                    >
+                      Registrar Pago / Abono
+                    </button>
+                    <button
+                      onClick={() => handleCheckout(selectedRoom.id)}
+                      className="py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
+                    >
+                      Liberar (Check-out)
+                    </button>
+                  </div>
                   <button
-                    onClick={() => setShowPaymentModal(true)}
-                    className="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
+                    onClick={() => openEditModal(selectedRoom)}
+                    className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium rounded-xl text-sm transition-all flex items-center justify-center gap-2"
                   >
-                    Registrar Pago / Abono
-                  </button>
-                  <button
-                    onClick={() => handleCheckout(selectedRoom.id)}
-                    className="py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
-                  >
-                    Liberar (Check-out)
+                    <Pencil className="w-4 h-4 text-slate-600" /> Editar Habitación / Huésped
                   </button>
                 </div>
               </div>
@@ -896,16 +976,16 @@ export default function Hotel1() {
       )}
       {/* --- MODAL GESTIONAR HABITACIONES --- */}
       {showRoomsModal && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 max-h-[85vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/70 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-5 sm:p-8 space-y-6 max-h-[85vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-2xl font-bold text-slate-900">Estado de Habitaciones</h3>
-                <p className="text-slate-500 text-sm">Selecciona una habitación para ver detalles, realizar check-in, cobros o check-out.</p>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Estado de Habitaciones</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">Selecciona una habitación para ver detalles, realizar check-in, cobros o check-out.</p>
               </div>
               <button 
                 onClick={() => setShowRoomsModal(false)} 
-                className="p-1 text-slate-400 bg-slate-100 hover:text-slate-600 rounded-lg"
+                className="p-1 text-slate-400 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:text-slate-600 dark:hover:text-white rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -918,10 +998,10 @@ export default function Hotel1() {
                   onClick={() => setSelectedRoom(room)}
                   className={`p-5 rounded-2xl border text-left flex flex-col justify-between h-40 transition-all hover:scale-[1.01] hover:shadow-xs active:scale-[0.99] ${
                     room.status === 'Libre'
-                      ? 'bg-white border-slate-200 text-slate-800'
+                      ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
                       : room.status === 'Ocupada'
-                      ? 'bg-red-50/40 border-red-200 text-red-950'
-                      : 'bg-amber-50/50 border-amber-200 text-amber-950 animate-pulse'
+                      ? 'bg-red-50/40 dark:bg-red-950/40 border-red-200 dark:border-red-900/60 text-red-950 dark:text-red-200'
+                      : 'bg-amber-50/50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 animate-pulse'
                   }`}
                 >
                   <div className="w-full flex justify-between items-start">
@@ -935,15 +1015,15 @@ export default function Hotel1() {
                     }`} />
                   </div>
                   <div className="space-y-1">
-                    <span className="text-xs font-semibold text-slate-450 uppercase block">Tarifa diaria</span>
+                    <span className="text-xs font-semibold text-slate-450 dark:text-slate-400 uppercase block">Tarifa diaria</span>
                     <span className="text-lg font-bold">${Number(room.price || 0).toLocaleString('de-DE')}</span>
                     {room.guest_name && (
                       <div className="flex flex-col space-y-1 mt-1.5">
                         <span className="text-xs font-medium block truncate max-w-[120px]">👤 {room.guest_name}</span>
                         {room.status === 'Ocupada' ? (
-                          <span className="inline-flex items-center text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-md self-start">Al día</span>
+                          <span className="inline-flex items-center text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/60 px-1.5 py-0.5 rounded-md self-start">Al día</span>
                         ) : (
-                          <span className="inline-flex items-center text-[9px] font-bold text-red-650 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-md self-start animate-pulse">Debe pago</span>
+                          <span className="inline-flex items-center text-[9px] font-bold text-red-650 dark:text-red-400 bg-red-50 dark:bg-red-950/60 border border-red-100 dark:border-red-900/60 px-1.5 py-0.5 rounded-md self-start animate-pulse">Debe pago</span>
                         )}
                       </div>
                     )}
@@ -951,6 +1031,162 @@ export default function Hotel1() {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+      {/* --- MODAL EDITAR HABITACIÓN Y HUÉSPED --- */}
+      {showEditModal && selectedRoom && (
+        <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Editar Habitación {selectedRoom.number}</h3>
+                <p className="text-xs text-slate-500">Modifica la información de la habitación y del huésped.</p>
+              </div>
+              <button onClick={() => setShowEditModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateRoom} className="space-y-5">
+              {/* Sección Habitación */}
+              <div className="space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+                <h4 className="font-semibold text-slate-800 text-sm flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-emerald-600" /> Datos de la Habitación
+                </h4>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Número *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editForm.number}
+                      onChange={(e) => setEditForm({ ...editForm, number: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Precio por día ($) *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editForm.price}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\./g, '');
+                        if (!isNaN(Number(raw)) || raw === '') {
+                          const formatted = raw ? Number(raw).toLocaleString('de-DE') : '';
+                          setEditForm({ ...editForm, price: formatted });
+                        }
+                      }}
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Observaciones</label>
+                  <textarea
+                    value={editForm.observations}
+                    onChange={(e) => setEditForm({ ...editForm, observations: e.target.value })}
+                    rows={2}
+                    placeholder="Detalles sobre la habitación..."
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              {/* Sección Huésped (Si la habitación está ocupada o tiene datos de huésped) */}
+              {(selectedRoom.status !== 'Libre' || selectedRoom.guest_name) && (
+                <div className="space-y-4 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                  <h4 className="font-semibold text-indigo-900 text-sm flex items-center gap-2">
+                    <User className="w-4 h-4 text-indigo-600" /> Información del Huésped y Pago
+                  </h4>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Nombre del Huésped *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editForm.guest_name}
+                      onChange={(e) => setEditForm({ ...editForm, guest_name: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Documento</label>
+                      <input
+                        type="text"
+                        value={editForm.guest_document}
+                        onChange={(e) => setEditForm({ ...editForm, guest_document: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Teléfono</label>
+                      <input
+                        type="text"
+                        value={editForm.guest_phone}
+                        onChange={(e) => setEditForm({ ...editForm, guest_phone: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Frecuencia / Tipo de Pago *</label>
+                    <select
+                      value={editForm.payment_type}
+                      onChange={(e) => {
+                        const newType = e.target.value;
+                        let baseDate = selectedRoom.check_in_date ? new Date(selectedRoom.check_in_date) : new Date();
+                        let nextP = new Date(baseDate);
+                        if (newType === 'Pago diario') nextP.setDate(baseDate.getDate() + 1);
+                        else if (newType === 'Pago cada 3 días') nextP.setDate(baseDate.getDate() + 3);
+                        else if (newType === 'Pago semanal') nextP.setDate(baseDate.getDate() + 7);
+
+                        const formattedDate = nextP.toISOString().split('T')[0];
+                        setEditForm({ ...editForm, payment_type: newType, next_payment_date: formattedDate });
+                      }}
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="Pago diario">Pago diario</option>
+                      <option value="Pago cada 3 días">Pago cada 3 días</option>
+                      <option value="Pago semanal">Pago semanal</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Próxima Fecha de Cobro *</label>
+                    <input
+                      type="date"
+                      required
+                      value={editForm.next_payment_date}
+                      onChange={(e) => setEditForm({ ...editForm, next_payment_date: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="w-1/2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-sm transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="w-1/2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
+                >
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -14,6 +14,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 import API_URL from '../config/api';
+import { getTodayString } from '../utils/date';
 
 interface Sale {
   id: number;
@@ -52,7 +53,7 @@ export default function Restaurante() {
   const [showPdfModal, setShowPdfModal] = useState(false);
 
   // Fecha para reporte PDF
-  const [pdfDate, setPdfDate] = useState(new Date().toISOString().split('T')[0]);
+  const [pdfDate, setPdfDate] = useState(getTodayString());
   const [pdfGenerating, setPdfGenerating] = useState(false);
 
   // Formularios
@@ -61,7 +62,7 @@ export default function Restaurante() {
     quantity: '1',
     value: '',
     payment_method: 'Efectivo',
-    date: new Date().toISOString().split('T')[0],
+    date: getTodayString(),
     observations: ''
   });
 
@@ -69,7 +70,7 @@ export default function Restaurante() {
     provider: '',
     concept: '',
     value: '',
-    date: new Date().toISOString().split('T')[0],
+    date: getTodayString(),
     observations: ''
   });
 
@@ -135,7 +136,7 @@ export default function Restaurante() {
         quantity: '1',
         value: '',
         payment_method: 'Efectivo',
-        date: new Date().toISOString().split('T')[0],
+        date: getTodayString(),
         observations: ''
       });
       fetchData();
@@ -171,7 +172,7 @@ export default function Restaurante() {
         provider: '',
         concept: '',
         value: '',
-        date: new Date().toISOString().split('T')[0],
+        date: getTodayString(),
         observations: ''
       });
       fetchData();
@@ -309,31 +310,31 @@ export default function Restaurante() {
       {/* Cabecera */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-3">
             <span className="p-2 bg-rose-500 text-white rounded-2xl border border-rose-600 shadow-sm"><UtensilsCrossed className="w-6 h-6" /></span>
             Restaurante
           </h1>
-          <p className="text-slate-655 text-sm">Registro rápido de caja, ventas diarias y reporte de egresos.</p>
+          <p className="text-slate-655 dark:text-slate-400 text-sm">Registro rápido de caja, ventas diarias y reporte de egresos.</p>
         </div>
 
         <div className="flex gap-3">
           <button
             onClick={() => setShowPdfModal(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
-            <FileText className="w-4 h-4 text-orange-600" />
+            <FileText className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             <span>Generar Reporte PDF</span>
           </button>
           <button
             onClick={() => setShowExpenseModal(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Registrar Gasto</span>
           </button>
           <button
             onClick={() => setShowSaleModal(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-slate-900 dark:bg-rose-600 hover:bg-slate-800 dark:hover:bg-rose-700 text-white font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Registrar Venta</span>
@@ -344,36 +345,36 @@ export default function Restaurante() {
       {/* Tarjetas de Métricas */}
       {dashboard && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
               Ventas de hoy
-              <span className="inline-flex p-1 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
+              <span className="inline-flex p-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.today.sales || 0).toLocaleString('de-DE')}</span>
+              <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">${Number(dashboard.today.sales || 0).toLocaleString('de-DE')}</span>
               <span className="text-xs text-slate-400">Hoy</span>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
               Ventas del mes
-              <span className="inline-flex p-1 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
+              <span className="inline-flex p-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.month.sales || 0).toLocaleString('de-DE')}</span>
+              <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">${Number(dashboard.month.sales || 0).toLocaleString('de-DE')}</span>
               <span className="text-xs text-slate-400">Mes actual</span>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
               Balance Mensual (Caja)
-              <span className="inline-flex p-1 bg-orange-50 text-orange-600 rounded-lg"><DollarSign className="w-3.5 h-3.5" /></span>
+              <span className="inline-flex p-1 bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 rounded-lg"><DollarSign className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.month.balance || 0).toLocaleString('de-DE')}</span>
-              <span className="text-xs text-slate-550 font-medium">Gastos mes: ${Number(dashboard.month.expense || 0).toLocaleString('de-DE')}</span>
+              <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">${Number(dashboard.month.balance || 0).toLocaleString('de-DE')}</span>
+              <span className="text-xs text-slate-550 dark:text-slate-400 font-medium">Gastos mes: ${Number(dashboard.month.expense || 0).toLocaleString('de-DE')}</span>
             </div>
           </div>
         </div>
@@ -383,15 +384,15 @@ export default function Restaurante() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Tabla Ventas */}
-        <div className="bg-white rounded-2xl border border-slate-150/60 shadow-xs p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-slate-800 tracking-tight flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-slate-500" />
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-slate-500 dark:text-slate-400" />
             Ventas Recientes
           </h2>
-          <div className="overflow-x-auto max-h-[350px] overflow-y-auto border border-slate-100 rounded-xl pr-1">
+          <div className="overflow-x-auto max-h-[350px] overflow-y-auto border border-slate-100 dark:border-slate-800 rounded-xl pr-1">
             <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-medium">
+                <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-400 font-medium">
                   <th className="py-3 px-2">Producto</th>
                   <th className="py-3 px-2">Cant.</th>
                   <th className="py-3 px-2">Pago</th>
@@ -401,17 +402,17 @@ export default function Restaurante() {
               </thead>
               <tbody>
                 {sales.map((sale) => (
-                  <tr key={sale.id} className="border-b border-slate-50 hover:bg-slate-50/50">
-                    <td className="py-3 px-2 font-medium text-slate-800">{sale.product}</td>
-                    <td className="py-3 px-2 text-slate-500">x{sale.quantity}</td>
-                    <td className="py-3 px-2 text-slate-500 text-xs">{sale.payment_method}</td>
-                    <td className="py-3 px-2 text-right font-semibold text-emerald-600">
+                  <tr key={sale.id} className="border-b border-slate-50 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                    <td className="py-3 px-2 font-medium text-slate-800 dark:text-slate-100">{sale.product}</td>
+                    <td className="py-3 px-2 text-slate-500 dark:text-slate-400">x{sale.quantity}</td>
+                    <td className="py-3 px-2 text-slate-500 dark:text-slate-400 text-xs">{sale.payment_method}</td>
+                    <td className="py-3 px-2 text-right font-semibold text-emerald-600 dark:text-emerald-400">
                       ${Number(sale.total || 0).toLocaleString('de-DE')}
                     </td>
                     <td className="py-3 px-2 text-center">
                       <button
                         onClick={() => handleDeleteSale(sale.id)}
-                        className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-lg transition-all"
+                        className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-all"
                         title="Eliminar venta"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -421,7 +422,7 @@ export default function Restaurante() {
                 ))}
                 {sales.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-6 text-center text-slate-450">No hay ventas hoy.</td>
+                    <td colSpan={5} className="py-6 text-center text-slate-450 dark:text-slate-400">No hay ventas hoy.</td>
                   </tr>
                 )}
               </tbody>
@@ -430,15 +431,15 @@ export default function Restaurante() {
         </div>
 
         {/* Tabla Gastos */}
-        <div className="bg-white rounded-2xl border border-slate-150/60 shadow-xs p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-slate-800 tracking-tight flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-slate-500" />
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-slate-500 dark:text-slate-400" />
             Gastos Recientes
           </h2>
-          <div className="overflow-x-auto max-h-[350px] overflow-y-auto border border-slate-100 rounded-xl pr-1">
+          <div className="overflow-x-auto max-h-[350px] overflow-y-auto border border-slate-100 dark:border-slate-800 rounded-xl pr-1">
             <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-medium">
+                <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-400 font-medium">
                   <th className="py-3 px-2">Proveedor</th>
                   <th className="py-3 px-2">Concepto</th>
                   <th className="py-3 px-2 text-right">Valor</th>
@@ -447,16 +448,16 @@ export default function Restaurante() {
               </thead>
               <tbody>
                 {expenses.map((exp) => (
-                  <tr key={exp.id} className="border-b border-slate-50 hover:bg-slate-50/50">
-                    <td className="py-3 px-2 font-medium text-slate-800">{exp.provider}</td>
-                    <td className="py-3 px-2 text-slate-500 max-w-[130px] truncate">{exp.concept}</td>
-                    <td className="py-3 px-2 text-right font-semibold text-red-600">
+                  <tr key={exp.id} className="border-b border-slate-50 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                    <td className="py-3 px-2 font-medium text-slate-800 dark:text-slate-100">{exp.provider}</td>
+                    <td className="py-3 px-2 text-slate-500 dark:text-slate-400 max-w-[130px] truncate">{exp.concept}</td>
+                    <td className="py-3 px-2 text-right font-semibold text-red-600 dark:text-red-400">
                       ${Number(exp.value || 0).toLocaleString('de-DE')}
                     </td>
                     <td className="py-3 px-2 text-center">
                       <button
                         onClick={() => handleDeleteExpense(exp.id)}
-                        className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-lg transition-all"
+                        className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-all"
                         title="Eliminar gasto"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -466,7 +467,7 @@ export default function Restaurante() {
                 ))}
                 {expenses.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-6 text-center text-slate-450">No hay gastos hoy.</td>
+                    <td colSpan={4} className="py-6 text-center text-slate-450 dark:text-slate-400">No hay gastos hoy.</td>
                   </tr>
                 )}
               </tbody>

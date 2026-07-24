@@ -15,6 +15,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 import API_URL from '../config/api';
+import { getTodayString } from '../utils/date';
 
 interface Provider {
   id: number;
@@ -60,7 +61,7 @@ export default function Lichigueria() {
   const [showPdfModal, setShowPdfModal] = useState(false);
 
   // Fecha para reporte PDF
-  const [pdfDate, setPdfDate] = useState(new Date().toISOString().split('T')[0]);
+  const [pdfDate, setPdfDate] = useState(getTodayString());
   const [pdfGenerating, setPdfGenerating] = useState(false);
 
   // Formularios
@@ -70,13 +71,13 @@ export default function Lichigueria() {
     unit: 'lb',
     value: '',
     payment_method: 'Efectivo',
-    date: new Date().toISOString().split('T')[0]
+    date: getTodayString()
   });
 
   const [expenseForm, setExpenseForm] = useState({
     concept: '',
     value: '',
-    date: new Date().toISOString().split('T')[0],
+    date: getTodayString(),
     observations: ''
   });
 
@@ -152,7 +153,7 @@ export default function Lichigueria() {
         unit: 'lb',
         value: '',
         payment_method: 'Efectivo',
-        date: new Date().toISOString().split('T')[0]
+        date: getTodayString()
       });
       fetchData();
     } catch (err: any) {
@@ -185,7 +186,7 @@ export default function Lichigueria() {
       setExpenseForm({
         concept: '',
         value: '',
-        date: new Date().toISOString().split('T')[0],
+        date: getTodayString(),
         observations: ''
       });
       fetchData();
@@ -346,38 +347,38 @@ export default function Lichigueria() {
       {/* Cabecera */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-3">
             <span className="p-2 bg-amber-500 text-white rounded-2xl border border-amber-600 shadow-sm"><Leaf className="w-6 h-6" /></span>
             Lichiguería
           </h1>
-          <p className="text-slate-655 text-sm">Registro de ventas de legumbres y verduras, proveedores e historial financiero.</p>
+          <p className="text-slate-655 dark:text-slate-400 text-sm">Registro de ventas de legumbres y verduras, proveedores e historial financiero.</p>
         </div>
 
         <div className="flex flex-wrap gap-3 w-full xl:w-auto">
           <button
             onClick={() => setShowPdfModal(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
-            <FileText className="w-4 h-4 text-indigo-600" />
+            <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             <span>Reporte PDF</span>
           </button>
           <button
             onClick={() => setShowProviderModal(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Nuevo Proveedor</span>
           </button>
           <button
             onClick={() => setShowExpenseModal(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Nuevo Gasto</span>
           </button>
           <button
             onClick={() => setShowSaleModal(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-slate-900 dark:bg-amber-600 hover:bg-slate-800 dark:hover:bg-amber-700 text-white font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Nueva Venta</span>
@@ -388,33 +389,33 @@ export default function Lichigueria() {
       {/* Métricas */}
       {dashboard && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
               Ventas de hoy
-              <span className="inline-flex p-1 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
+              <span className="inline-flex p-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.today.sales || 0).toLocaleString('de-DE')}</span>
+              <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">${Number(dashboard.today.sales || 0).toLocaleString('de-DE')}</span>
               <span className="text-xs text-slate-400">Hoy</span>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
               Ventas del mes
-              <span className="inline-flex p-1 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
+              <span className="inline-flex p-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.month.sales || 0).toLocaleString('de-DE')}</span>
+              <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">${Number(dashboard.month.sales || 0).toLocaleString('de-DE')}</span>
               <span className="text-xs text-slate-400">Mes actual</span>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-150/60 shadow-xs space-y-4">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Balance Mensual</span>
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Balance Mensual</span>
             <div className="flex items-baseline justify-between">
-              <span className="text-3xl font-bold text-slate-800">${Number(dashboard.month.balance || 0).toLocaleString('de-DE')}</span>
-              <span className="text-xs text-slate-500">Gastos mes: ${Number(dashboard.month.expense || 0).toLocaleString('de-DE')}</span>
+              <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">${Number(dashboard.month.balance || 0).toLocaleString('de-DE')}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Gastos mes: ${Number(dashboard.month.expense || 0).toLocaleString('de-DE')}</span>
             </div>
           </div>
         </div>
@@ -424,19 +425,19 @@ export default function Lichigueria() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Proveedores */}
-        <div className="bg-white rounded-2xl border border-slate-150/60 shadow-xs p-6 space-y-4 h-[420px] flex flex-col">
-          <h2 className="text-lg font-semibold text-slate-800 tracking-tight flex items-center gap-2">
-            <Users className="w-5 h-5 text-slate-500" />
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs p-6 space-y-4 h-[420px] flex flex-col">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            <Users className="w-5 h-5 text-slate-500 dark:text-slate-400" />
             Proveedores locales
           </h2>
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
             {providers.map((p) => (
-              <div key={p.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center text-sm">
+              <div key={p.id} className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700/60 flex justify-between items-center text-sm">
                 <div>
-                  <h4 className="font-semibold text-slate-800">{p.name}</h4>
-                  <span className="text-xs text-slate-500">Suministro: {p.product || 'Legumbres'}</span>
+                  <h4 className="font-semibold text-slate-800 dark:text-slate-100">{p.name}</h4>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">Suministro: {p.product || 'Legumbres'}</span>
                 </div>
-                {p.phone && <span className="text-xs text-indigo-650 font-medium">{p.phone}</span>}
+                {p.phone && <span className="text-xs text-indigo-650 dark:text-indigo-400 font-medium">{p.phone}</span>}
               </div>
             ))}
             {providers.length === 0 && (
@@ -446,23 +447,23 @@ export default function Lichigueria() {
         </div>
 
         {/* Ventas */}
-        <div className="bg-white rounded-2xl border border-slate-150/60 shadow-xs p-6 space-y-4 h-[420px] flex flex-col">
-          <h2 className="text-lg font-semibold text-slate-800 tracking-tight flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-slate-500" />
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs p-6 space-y-4 h-[420px] flex flex-col">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-slate-500 dark:text-slate-400" />
             Registro de Ventas
           </h2>
           <div className="flex-1 overflow-y-auto space-y-2 pr-1">
             {sales.map((sale) => (
-              <div key={sale.id} className="p-3 border-b border-slate-50 flex justify-between items-center text-sm">
+              <div key={sale.id} className="p-3 border-b border-slate-50 dark:border-slate-800/60 flex justify-between items-center text-sm">
                 <div>
-                  <h4 className="font-medium text-slate-800">{sale.product}</h4>
+                  <h4 className="font-medium text-slate-800 dark:text-slate-100">{sale.product}</h4>
                   <span className="text-xs text-slate-400">{sale.quantity} {sale.unit} | {sale.payment_method}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-emerald-600">${Number(sale.value || 0).toLocaleString('de-DE')}</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">${Number(sale.value || 0).toLocaleString('de-DE')}</span>
                   <button
                     onClick={() => handleDeleteSale(sale.id)}
-                    className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-lg transition-all"
+                    className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-all"
                     title="Eliminar venta"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -477,23 +478,23 @@ export default function Lichigueria() {
         </div>
 
         {/* Gastos */}
-        <div className="bg-white rounded-2xl border border-slate-150/60 shadow-xs p-6 space-y-4 h-[420px] flex flex-col">
-          <h2 className="text-lg font-semibold text-slate-800 tracking-tight flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-slate-500" />
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs p-6 space-y-4 h-[420px] flex flex-col">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-slate-500 dark:text-slate-400" />
             Gastos e Insumos
           </h2>
           <div className="flex-1 overflow-y-auto space-y-2 pr-1">
             {expenses.map((exp) => (
-              <div key={exp.id} className="p-3 border-b border-slate-50 flex justify-between items-center text-sm">
+              <div key={exp.id} className="p-3 border-b border-slate-50 dark:border-slate-800/60 flex justify-between items-center text-sm">
                 <div>
-                  <h4 className="font-medium text-slate-800">{exp.concept}</h4>
+                  <h4 className="font-medium text-slate-800 dark:text-slate-100">{exp.concept}</h4>
                   <span className="text-xs text-slate-400">{exp.date}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-red-600">${Number(exp.value || 0).toLocaleString('de-DE')}</span>
+                  <span className="font-semibold text-red-600 dark:text-red-400">${Number(exp.value || 0).toLocaleString('de-DE')}</span>
                   <button
                     onClick={() => handleDeleteExpense(exp.id)}
-                    className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 rounded-lg transition-all"
+                    className="p-1 text-red-500 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-all"
                     title="Eliminar gasto"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 body {
   background-color: #f8fafc;
   color: #0f172a;
@@ -8,11 +10,16 @@ body {
   margin: 0;
 }
 
-* {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+.dark body {
+  background-color: #030712;
+  color: #f9fafb;
 }
 
-/* Custom Scrollbar for premium feel */
+* {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -28,6 +35,13 @@ body {
   background: #94a3b8;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -39,3 +53,131 @@ body {
   animation: marquee 30s linear infinite;
 }
 
+/* Soporte Inteligente de Modo Oscuro para tarjetas, modales y formularios */
+.dark .bg-white {
+  background-color: #0f172a;
+  border-color: #1e293b;
+  color: #f8fafc;
+}
+
+.dark .bg-slate-50 {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.dark .bg-slate-100 {
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
+
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #f8fafc;
+}
+
+.dark .text-slate-500,
+.dark .text-slate-600 {
+  color: #94a3b8;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b;
+}
+
+.dark table th {
+  color: #94a3b8;
+}
+
+.dark table tr {
+  border-color: #1e293b;
+}
+
+.dark table tbody tr:hover {
+  background-color: rgba(30, 41, 59, 0.5);
+}
+
+/* ============================================================
+   EFECTO HOVER CON NEÓN DE ALTO IMPACTO PARA TODOS LOS BOTONES
+   ============================================================ */
+
+button, 
+a.button-like {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* Neón Verde (Hotel 1 / Éxito) */
+.bg-emerald-600:hover, 
+.bg-emerald-500:hover,
+button.bg-emerald-600:hover,
+button.bg-emerald-500:hover {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.75), 0 0 8px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Neón Teal (Hotel 2) */
+.bg-teal-600:hover, 
+.bg-teal-500:hover,
+button.bg-teal-600:hover,
+button.bg-teal-500:hover {
+  box-shadow: 0 0 20px rgba(13, 148, 136, 0.75), 0 0 8px rgba(13, 148, 136, 0.4) !important;
+}
+
+/* Neón Rosa/Magenta (Restaurante / Peligro) */
+.bg-rose-600:hover, 
+.bg-rose-500:hover,
+button.bg-rose-600:hover,
+button.bg-rose-500:hover {
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.75), 0 0 8px rgba(244, 63, 94, 0.4) !important;
+}
+
+/* Neón Ámbar (Lichiguería / Advertencia) */
+.bg-amber-500:hover, 
+.bg-amber-600:hover,
+button.bg-amber-500:hover,
+button.bg-amber-600:hover {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.75), 0 0 8px rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Neón Índigo / Violeta (Configuración / Primario) */
+.bg-indigo-600:hover, 
+.bg-indigo-500:hover,
+button.bg-indigo-600:hover,
+button.bg-indigo-500:hover {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.8), 0 0 8px rgba(99, 102, 241, 0.5) !important;
+}
+
+/* Neón Azul Oscuro / Slate 900 */
+.bg-slate-900:hover,
+button.bg-slate-900:hover {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.65), 0 0 10px rgba(129, 140, 248, 0.45) !important;
+}
+
+/* Neón Botones Blancos o Secundarios */
+button.bg-white:hover {
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.35), 0 0 6px rgba(99, 102, 241, 0.2) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important;
+}
+
+.dark button.bg-slate-800:hover,
+.dark button.bg-slate-900:hover {
+  box-shadow: 0 0 18px rgba(129, 140, 248, 0.5), 0 0 8px rgba(129, 140, 248, 0.3) !important;
+  border-color: rgba(129, 140, 248, 0.5) !important;
+}

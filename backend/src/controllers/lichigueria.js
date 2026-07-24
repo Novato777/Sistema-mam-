@@ -1,12 +1,5 @@
 const db = require('../config/db');
-
-const getTodayString = () => {
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+const { getTodayString } = require('../utils/date');
 
 exports.getDashboard = async (req, res) => {
   try {
@@ -111,8 +104,10 @@ exports.createSale = async (req, res) => {
 
 exports.getSales = async (req, res) => {
   try {
+    const today = getTodayString();
     const sales = await db.query(
-      'SELECT * FROM lichigueria_sales ORDER BY date DESC, id DESC LIMIT 50'
+      'SELECT * FROM lichigueria_sales WHERE date = ? ORDER BY id DESC',
+      [today]
     );
     res.json(sales);
   } catch (error) {
@@ -143,8 +138,10 @@ exports.createExpense = async (req, res) => {
 
 exports.getExpenses = async (req, res) => {
   try {
+    const today = getTodayString();
     const expenses = await db.query(
-      'SELECT * FROM lichigueria_expenses ORDER BY date DESC, id DESC LIMIT 50'
+      'SELECT * FROM lichigueria_expenses WHERE date = ? ORDER BY id DESC',
+      [today]
     );
     res.json(expenses);
   } catch (error) {
