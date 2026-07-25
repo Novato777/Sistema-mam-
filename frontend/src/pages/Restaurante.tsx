@@ -492,7 +492,7 @@ export default function Restaurante() {
 
             <form onSubmit={handleCreateSale} className="space-y-4">
               {/* Acceso Rápido */}
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Acceso Rápido / Seleccionar Comida</label>
                 <select
                   onChange={(e) => {
@@ -508,23 +508,6 @@ export default function Restaurante() {
                   <option value="Sopa">🥣 Sopa</option>
                   <option value="Caldo">🥣 Caldo</option>
                 </select>
-
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {['Almuerzo', 'Desayuno', 'Sopa', 'Caldo'].map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => setSaleForm({ ...saleForm, product: item })}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all ${
-                        saleForm.product === item
-                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs scale-[1.02]'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div className="space-y-1">
