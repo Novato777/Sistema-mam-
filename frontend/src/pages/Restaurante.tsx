@@ -478,42 +478,81 @@ export default function Restaurante() {
 
       {/* --- MODAL REGISTRAR VENTA --- */}
       {showSaleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/70 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
-              <h3 className="text-xl font-bold text-slate-900">Registrar Venta</h3>
-              <button onClick={() => setShowSaleModal(false)} className="p-1 text-slate-400 bg-slate-100 rounded-lg">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Registrar Venta</h3>
+              <button 
+                onClick={() => setShowSaleModal(false)} 
+                className="p-1 text-slate-400 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:text-slate-600 dark:hover:text-white rounded-lg"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleCreateSale} className="space-y-4">
+              {/* Acceso Rápido */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Acceso Rápido / Seleccionar Comida</label>
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setSaleForm({ ...saleForm, product: e.target.value });
+                    }
+                  }}
+                  className="w-full px-4 py-3 bg-rose-50/60 dark:bg-slate-800 border border-rose-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all cursor-pointer"
+                >
+                  <option value="">-- Elegir comida rápida --</option>
+                  <option value="Almuerzo">🍲 Almuerzo</option>
+                  <option value="Desayuno">🍳 Desayuno</option>
+                  <option value="Sopa">🥣 Sopa</option>
+                  <option value="Caldo">🥣 Caldo</option>
+                </select>
+
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {['Almuerzo', 'Desayuno', 'Sopa', 'Caldo'].map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setSaleForm({ ...saleForm, product: item })}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                        saleForm.product === item
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs scale-[1.02]'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Producto *</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Nombre del Producto *</label>
                 <input
                   type="text"
                   required
                   value={saleForm.product}
                   onChange={(e) => setSaleForm({ ...saleForm, product: e.target.value })}
-                  placeholder="Nombre de producto / comida"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  placeholder="Escribe o selecciona arriba..."
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 transition-all font-medium"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Cantidad *</label>
+                  <label className="text-xs font-semibold text-slate-650 dark:text-slate-400 uppercase tracking-wider">Cantidad *</label>
                   <input
                     type="number"
                     required
                     value={saleForm.quantity}
                     onChange={(e) => setSaleForm({ ...saleForm, quantity: e.target.value })}
                     placeholder="1"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 transition-all font-medium"
                   />
                 </div>
                  <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Precio Unitario *</label>
+                  <label className="text-xs font-semibold text-slate-650 dark:text-slate-400 uppercase tracking-wider">Precio Unitario ($) *</label>
                   <input
                     type="text"
                     required
@@ -526,17 +565,17 @@ export default function Restaurante() {
                       }
                     }}
                     placeholder="Monto"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 transition-all font-medium"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Forma de Pago *</label>
+                <label className="text-xs font-semibold text-slate-650 dark:text-slate-400 uppercase tracking-wider">Forma de Pago *</label>
                 <select
                   value={saleForm.payment_method}
                   onChange={(e) => setSaleForm({ ...saleForm, payment_method: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 transition-all font-medium"
                 >
                   <option value="Efectivo">Efectivo</option>
                   <option value="Transferencia">Transferencia</option>
@@ -544,19 +583,19 @@ export default function Restaurante() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-655 uppercase tracking-wider">Observaciones</label>
+                <label className="text-xs font-semibold text-slate-655 dark:text-slate-400 uppercase tracking-wider">Observaciones</label>
                 <textarea
                   value={saleForm.observations}
                   onChange={(e) => setSaleForm({ ...saleForm, observations: e.target.value })}
                   placeholder="Detalles de preparación, etc."
                   rows={2}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 transition-all font-medium"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-sm transition-all"
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2"
               >
                 Completar Venta
               </button>
@@ -567,42 +606,45 @@ export default function Restaurante() {
 
       {/* --- MODAL REGISTRAR GASTO --- */}
       {showExpenseModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/70 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
-              <h3 className="text-xl font-bold text-slate-900">Registrar Gasto</h3>
-              <button onClick={() => setShowExpenseModal(false)} className="p-1 text-slate-400 bg-slate-100 rounded-lg">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Registrar Gasto</h3>
+              <button 
+                onClick={() => setShowExpenseModal(false)} 
+                className="p-1 text-slate-400 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:text-slate-600 dark:hover:text-white rounded-lg"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleCreateExpense} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Proveedor *</label>
+                <label className="text-xs font-semibold text-slate-650 dark:text-slate-400 uppercase tracking-wider">Proveedor *</label>
                 <input
                   type="text"
                   required
                   value={expenseForm.provider}
                   onChange={(e) => setExpenseForm({ ...expenseForm, provider: e.target.value })}
                   placeholder="Nombre de proveedor / local comercial"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-slate-800 transition-all"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Concepto *</label>
+                <label className="text-xs font-semibold text-slate-650 dark:text-slate-400 uppercase tracking-wider">Concepto *</label>
                 <input
                   type="text"
                   required
                   value={expenseForm.concept}
                   onChange={(e) => setExpenseForm({ ...expenseForm, concept: e.target.value })}
                   placeholder="Ej: Insumos de cocina, Carnes"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-slate-800 transition-all"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Valor total ($) *</label>
+                <label className="text-xs font-semibold text-slate-650 dark:text-slate-400 uppercase tracking-wider">Valor total ($) *</label>
                 <input
                   type="text"
                   required
@@ -615,13 +657,13 @@ export default function Restaurante() {
                     }
                   }}
                   placeholder="Monto"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-slate-800 transition-all"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-sm transition-all"
+                className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-bold rounded-xl text-sm shadow-md transition-all"
               >
                 Completar Gasto
               </button>
@@ -632,31 +674,34 @@ export default function Restaurante() {
 
       {/* --- MODAL REPORTES PDF --- */}
       {showPdfModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/70 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
-              <h3 className="text-xl font-bold text-slate-900">Reporte Diario PDF</h3>
-              <button onClick={() => setShowPdfModal(false)} className="p-1 text-slate-400 bg-slate-100 rounded-lg">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Reporte Diario PDF</h3>
+              <button 
+                onClick={() => setShowPdfModal(false)} 
+                className="p-1 text-slate-400 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:text-slate-600 dark:hover:text-white rounded-lg"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-655 uppercase tracking-wider">Seleccionar Fecha *</label>
+                <label className="text-xs font-semibold text-slate-655 dark:text-slate-400 uppercase tracking-wider">Seleccionar Fecha *</label>
                 <input
                   type="date"
                   required
                   value={pdfDate}
                   onChange={(e) => setPdfDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:border-rose-500 focus:bg-white dark:focus:bg-slate-800 transition-all"
                 />
               </div>
 
               <button
                 onClick={generatePdfReport}
                 disabled={pdfGenerating}
-                className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-xl text-sm transition-all shadow-xs flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white font-bold rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2"
               >
                 {pdfGenerating ? 'Generando PDF...' : 'Descargar Reporte PDF'}
               </button>
