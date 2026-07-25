@@ -8,7 +8,9 @@ import {
   DollarSign,
   ClipboardList,
   FileText,
-  Trash2
+  Trash2,
+  ChevronDown,
+  Zap
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -492,22 +494,39 @@ export default function Restaurante() {
 
             <form onSubmit={handleCreateSale} className="space-y-4">
               {/* Acceso Rápido */}
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Acceso Rápido / Seleccionar Comida</label>
-                <select
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      setSaleForm({ ...saleForm, product: e.target.value });
-                    }
-                  }}
-                  className="w-full px-4 py-3 bg-rose-50/60 dark:bg-slate-800 border border-rose-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all cursor-pointer"
-                >
-                  <option value="">-- Elegir comida rápida --</option>
-                  <option value="Almuerzo">🍲 Almuerzo</option>
-                  <option value="Desayuno">🍳 Desayuno</option>
-                  <option value="Sopa">🥣 Sopa</option>
-                  <option value="Caldo">🥣 Caldo</option>
-                </select>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>Acceso Rápido / Seleccionar Comida</span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 border border-rose-100 dark:border-rose-900/60 px-2 py-0.5 rounded-full">
+                    <Zap className="w-3 h-3" /> Auto-llenado
+                  </span>
+                </label>
+                
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-rose-500 dark:text-rose-400">
+                    <UtensilsCrossed className="w-4 h-4" />
+                  </div>
+
+                  <select
+                    value={['Almuerzo', 'Desayuno', 'Sopa', 'Caldo'].includes(saleForm.product) ? saleForm.product : ''}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setSaleForm({ ...saleForm, product: e.target.value });
+                      }
+                    }}
+                    className="w-full pl-10 pr-10 py-3.5 bg-gradient-to-r from-rose-50/80 via-amber-50/40 to-rose-50/60 dark:from-slate-800 dark:via-slate-800/90 dark:to-slate-800 border-2 border-rose-200/90 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 shadow-xs transition-all cursor-pointer appearance-none"
+                  >
+                    <option value="" className="bg-white dark:bg-slate-900 text-slate-500">✨ -- Seleccionar Menú Rápido --</option>
+                    <option value="Desayuno" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-medium py-2">🍳 Desayuno</option>
+                    <option value="Almuerzo" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-medium py-2">🍲 Almuerzo</option>
+                    <option value="Sopa" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-medium py-2">🥣 Sopa</option>
+                    <option value="Caldo" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-medium py-2">🍵 Caldo</option>
+                  </select>
+
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-1">
