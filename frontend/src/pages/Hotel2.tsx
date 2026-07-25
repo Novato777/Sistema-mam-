@@ -34,6 +34,10 @@ interface Room {
   check_in_date?: string;
   payment_type?: string;
   next_payment_date?: string;
+  pending_balance?: number;
+  total_pending?: number;
+  accrued_periods?: number;
+  accrued_amount?: number;
 }
 
 interface DashboardData {
@@ -76,7 +80,8 @@ export default function Hotel2() {
     guest_document: '',
     guest_phone: '',
     payment_type: 'Pago diario',
-    next_payment_date: getTodayString()
+    next_payment_date: getTodayString(),
+    pending_balance: ''
   });
 
   // Formulario Asignación Huésped
@@ -85,7 +90,8 @@ export default function Hotel2() {
     document: '',
     phone: '',
     checkInDate: getTodayString(),
-    paymentType: 'Pago diario'
+    paymentType: 'Pago diario',
+    initialPayment: ''
   });
 
   // Formulario Registrar Pago
@@ -147,13 +153,20 @@ export default function Hotel2() {
     if (!selectedRoom) return;
 
     try {
+      const initialPayVal = guestForm.initialPayment
+        ? parseFloat(guestForm.initialPayment.replace(/\./g, ''))
+        : undefined;
+
       const response = await fetch(`${API_URL}/api/hotel-2/rooms/${selectedRoom.id}/guest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(guestForm)
+        body: JSON.stringify({
+          ...guestForm,
+          initialPayment: initialPayVal
+        })
       });
 
       if (!response.ok) {
@@ -167,8 +180,9 @@ export default function Hotel2() {
         name: '',
         document: '',
         phone: '',
-        checkInDate: new Date().toISOString().split('T')[0],
-        paymentType: 'Pago diario'
+        checkInDate: getTodayString(),
+        paymentType: 'Pago diario',
+        initialPayment: ''
       });
       fetchData();
     } catch (err: any) {
@@ -176,20 +190,23 @@ export default function Hotel2() {
     }
   };
 
-  const handleRegisterPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitPayment = async (amountNum: number, pDate: string) => {
     if (!selectedRoom) return;
+    if (isNaN(amountNum) || amountNum <= 0) {
+      alert('Por favor ingrese un monto válido mayor a cero.');
+      return;
+    }
 
     try {
-       const response = await fetch(`${API_URL}/api/hotel-2/rooms/${selectedRoom.id}/payment`, {
+      const response = await fetch(`${API_URL}/api/hotel-2/rooms/${selectedRoom.id}/payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          amount: parseFloat(paymentAmount.replace(/\./g, '')),
-          date: paymentDate
+          amount: amountNum,
+          date: pDate
         })
       });
 
@@ -207,6 +224,12 @@ export default function Hotel2() {
     }
   };
 
+  const handleRegisterPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsedAmount = parseFloat(paymentAmount.replace(/\./g, ''));
+    await submitPayment(parsedAmount, paymentDate);
+  };
+
   const openEditModal = (room: Room) => {
     setSelectedRoom(room);
     setEditForm({
@@ -217,7 +240,8 @@ export default function Hotel2() {
       guest_document: room.guest_document || '',
       guest_phone: room.guest_phone || '',
       payment_type: room.payment_type || 'Pago diario',
-      next_payment_date: room.next_payment_date || getTodayString()
+      next_payment_date: room.next_payment_date || getTodayString(),
+      pending_balance: room.pending_balance !== undefined ? Number(room.pending_balance).toLocaleString('de-DE') : '0'
     });
     setShowEditModal(true);
   };
@@ -241,7 +265,8 @@ export default function Hotel2() {
           guest_document: editForm.guest_document,
           guest_phone: editForm.guest_phone,
           payment_type: editForm.payment_type,
-          next_payment_date: editForm.next_payment_date
+          next_payment_date: editForm.next_payment_date,
+          pending_balance: parseFloat(editForm.pending_balance.replace(/\./g, '')) || 0
         })
       });
 
@@ -379,15 +404,16 @@ export default function Hotel2() {
   return (
     <div className="space-y-8 pb-12">
       {/* Listón Superior */}
-      <div className="w-full h-2.5 bg-teal-500 rounded-full mb-4 shadow-sm"></div>
-
+      <div className="w-full h-2.5 bg-blue-500 rounded-full mb-4 shadow-sm"></div>
+      
+      {/* Cabecera */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-3">
-            <span className="p-2 bg-teal-500 text-white rounded-2xl border border-teal-600 shadow-sm"><Building2 className="w-6 h-6" /></span>
+            <span className="p-2 bg-blue-500 text-white rounded-2xl border border-blue-600 shadow-sm"><Building2 className="w-6 h-6" /></span>
             Hotel 2
           </h1>
-          <p className="text-slate-655 dark:text-slate-400 text-sm">Dashboard operativo y control de habitaciones (Independiente).</p>
+          <p className="text-slate-655 dark:text-slate-400 text-sm">Dashboard operativo y control de habitaciones con abonos.</p>
         </div>
 
         <div className="flex gap-3">
@@ -400,7 +426,7 @@ export default function Hotel2() {
           </button>
           <button
             onClick={() => setShowAddTxModal(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-slate-900 dark:bg-teal-600 hover:bg-slate-800 dark:hover:bg-teal-700 text-white font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 text-white font-medium rounded-xl text-sm shadow-xs active:scale-[0.98] transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Registrar Transacción</span>
@@ -408,6 +434,7 @@ export default function Hotel2() {
         </div>
       </div>
 
+      {/* Métricas del Dashboard */}
       {dashboard && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
@@ -423,7 +450,7 @@ export default function Hotel2() {
 
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs space-y-4">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
-              Ingresos del día
+              Ingresos de hoy
               <span className="inline-flex p-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-lg"><TrendingUp className="w-3.5 h-3.5" /></span>
             </span>
             <div className="flex items-baseline justify-between">
@@ -453,7 +480,7 @@ export default function Hotel2() {
               <span className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                 ${Number(dashboard.month.balance || 0).toLocaleString('de-DE')}
               </span>
-              <span className="text-xs text-slate-550 dark:text-slate-400 font-medium">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 Ing: ${Number(dashboard.month.income || 0).toLocaleString('de-DE')} | Gas: ${Number(dashboard.month.expense || 0).toLocaleString('de-DE')}
               </span>
             </div>
@@ -465,29 +492,30 @@ export default function Hotel2() {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="space-y-1 text-center sm:text-left">
           <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 tracking-tight flex items-center justify-center sm:justify-start gap-2">
-            <Building2 className="w-5 h-5 text-teal-500" />
+            <Building2 className="w-5 h-5 text-blue-500" />
             Estado de Habitaciones
           </h2>
-          <p className="text-slate-550 dark:text-slate-400 text-sm">Administra las habitaciones libres, ocupadas y registra huéspedes.</p>
+          <p className="text-slate-550 dark:text-slate-400 text-sm">Administra habitaciones, registra abonos y verifica saldos pendientes.</p>
         </div>
         <button
           onClick={() => setShowRoomsModal(true)}
-          className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.98]"
+          className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.98]"
         >
           <Building2 className="w-4 h-4" />
           <span>Ver / Gestionar Habitaciones ({rooms.length})</span>
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-150/60 shadow-xs p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-slate-800 tracking-tight flex items-center gap-2">
-          <ClipboardList className="w-5 h-5 text-slate-500" />
+      {/* Historial de Transacciones */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-150/60 dark:border-slate-800 shadow-xs p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
+          <ClipboardList className="w-5 h-5 text-slate-500 dark:text-slate-400" />
           Historial Financiero Reciente (Hotel 2)
         </h2>
-        <div className="overflow-x-auto max-h-[400px] overflow-y-auto border border-slate-100 rounded-xl pr-1">
+        <div className="overflow-x-auto max-h-[400px] overflow-y-auto border border-slate-100 dark:border-slate-800 rounded-xl pr-1">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 text-slate-400 font-medium">
+              <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-400 font-medium">
                 <th className="py-3 px-2">Fecha</th>
                 <th className="py-3 px-2">Tipo</th>
                 <th className="py-3 px-2">Categoría</th>
@@ -498,16 +526,16 @@ export default function Hotel2() {
             </thead>
             <tbody>
               {transactions.map((tx) => (
-                <tr key={tx.id} className="border-b border-slate-50 hover:bg-slate-50/50">
-                  <td className="py-3.5 px-2 text-slate-500">{tx.date}</td>
+                <tr key={tx.id} className="border-b border-slate-50 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                  <td className="py-3.5 px-2 text-slate-500 dark:text-slate-400">{tx.date}</td>
                   <td className="py-3.5 px-2">
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                      tx.type === 'Ingreso' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                      tx.type === 'Ingreso' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400' : 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400'
                     }`}>
                       {tx.type}
                     </span>
                   </td>
-                  <td className="py-3.5 px-2 text-slate-700 font-medium">{tx.category}</td>
+                  <td className="py-3.5 px-2 text-slate-700 dark:text-slate-200 font-medium">{tx.category}</td>
                   <td className="py-3.5 px-2 text-slate-500 max-w-xs truncate">{tx.description || '-'}</td>
                   <td className={`py-3.5 px-2 text-right font-semibold ${
                     tx.type === 'Ingreso' ? 'text-emerald-600' : 'text-red-600'
@@ -535,6 +563,7 @@ export default function Hotel2() {
         </div>
       </div>
 
+      {/* --- MODAL DETALLE HABITACIÓN --- */}
       {selectedRoom && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
           <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
@@ -543,7 +572,10 @@ export default function Hotel2() {
                 <h3 className="text-2xl font-bold text-slate-900">Habitación {selectedRoom.number}</h3>
                 <span className="text-sm text-slate-500 font-medium">Tarifa: ${Number(selectedRoom.price || 0).toLocaleString('de-DE')} / día</span>
               </div>
-              <button onClick={() => setSelectedRoom(null)} className="p-1 text-slate-400 bg-slate-100 hover:text-slate-650 rounded-lg">
+              <button 
+                onClick={() => setSelectedRoom(null)} 
+                className="p-1 text-slate-400 bg-slate-100 hover:text-slate-600 rounded-lg"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -614,6 +646,24 @@ export default function Hotel2() {
                       <span className="text-slate-400 block text-xs uppercase font-semibold">Próximo Cobro</span>
                       <span className="font-semibold text-amber-600">{selectedRoom.next_payment_date}</span>
                     </div>
+                    <div>
+                      <span className="text-slate-400 block text-xs uppercase font-semibold">Saldo Pendiente Anterior</span>
+                      <span className="font-semibold text-amber-600">${Number(selectedRoom.pending_balance || 0).toLocaleString('de-DE')}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-xs uppercase font-semibold">Total Cobro Pendiente</span>
+                      <span className="font-bold text-red-600">${
+                        (() => {
+                          const pendingBal = Number(selectedRoom.pending_balance || 0);
+                          const today = getTodayString();
+                          const isDue = selectedRoom.status === 'Pendiente de pago' || (selectedRoom.next_payment_date && selectedRoom.next_payment_date <= today);
+                          const calculated = (selectedRoom.total_pending !== undefined && selectedRoom.total_pending !== null && selectedRoom.total_pending > 0)
+                            ? selectedRoom.total_pending
+                            : (isDue ? (pendingBal > 0 ? pendingBal + Number(selectedRoom.price || 0) : Number(selectedRoom.price || 0)) : pendingBal);
+                          return calculated.toLocaleString('de-DE');
+                        })()
+                      }</span>
+                    </div>
                   </div>
                 </div>
 
@@ -621,7 +671,7 @@ export default function Hotel2() {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => setShowPaymentModal(true)}
-                      className="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
+                      className="py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
                     >
                       Registrar Pago / Abono
                     </button>
@@ -645,12 +695,13 @@ export default function Hotel2() {
         </div>
       )}
 
+      {/* --- MODAL ASIGNAR HUÉSPED --- */}
       {showAssignModal && selectedRoom && (
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-slate-900">Check-in Habitación {selectedRoom.number}</h3>
-              <button onClick={() => setShowAssignModal(false)} className="p-1 text-slate-400 bg-slate-100 hover:text-slate-600 rounded-lg">
+              <button onClick={() => setShowAssignModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -715,6 +766,33 @@ export default function Hotel2() {
                 </select>
               </div>
 
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Abono / Pago Inicial ($)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={guestForm.initialPayment}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\./g, '');
+                      if (!isNaN(Number(raw)) || raw === '') {
+                        const formatted = raw ? Number(raw).toLocaleString('de-DE') : '';
+                        setGuestForm({ ...guestForm, initialPayment: formatted });
+                      }
+                    }}
+                    placeholder={`Por defecto completo: $${Number(selectedRoom.price || 0).toLocaleString('de-DE')}`}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setGuestForm({ ...guestForm, initialPayment: Number(selectedRoom.price || 0).toLocaleString('de-DE') })}
+                    className="px-3 py-2 text-xs font-semibold bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-xl whitespace-nowrap transition-all"
+                  >
+                    Pago Completo
+                  </button>
+                </div>
+                <span className="text-[11px] text-slate-400">Si el huésped realiza un abono parcial, la diferencia se guardará automáticamente como saldo pendiente.</span>
+              </div>
+
               <button
                 type="submit"
                 className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
@@ -726,61 +804,102 @@ export default function Hotel2() {
         </div>
       )}
 
-      {showPaymentModal && selectedRoom && (
-        <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex justify-between items-start">
-              <h3 className="text-xl font-bold text-slate-900">Registrar Pago / Abono</h3>
-              <button onClick={() => setShowPaymentModal(false)} className="p-1 text-slate-400 bg-slate-100 rounded-lg">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* --- MODAL REGISTRAR PAGO --- */}
+      {showPaymentModal && selectedRoom && (() => {
+        const pendingBal = Number(selectedRoom.pending_balance || 0);
+        const today = getTodayString();
+        const isDue = selectedRoom.status === 'Pendiente de pago' || (selectedRoom.next_payment_date && selectedRoom.next_payment_date <= today);
+        const totalPending = (selectedRoom.total_pending !== undefined && selectedRoom.total_pending !== null && selectedRoom.total_pending > 0)
+          ? selectedRoom.total_pending
+          : (isDue ? (pendingBal > 0 ? pendingBal + Number(selectedRoom.price || 0) : Number(selectedRoom.price || 0)) : pendingBal);
 
-            <form onSubmit={handleRegisterPayment} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Valor recibido ($) *</label>
-                <input
-                  type="text"
-                  required
-                  value={paymentAmount}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/\./g, '');
-                    if (!isNaN(Number(raw)) || raw === '') {
-                      const formatted = raw ? Number(raw).toLocaleString('de-DE') : '';
-                      setPaymentAmount(formatted);
-                    }
-                  }}
-                  placeholder={`Tarifa sugerida: $${Number(selectedRoom.price || 0).toLocaleString('de-DE')}`}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
-                />
+        return (
+          <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">Registrar Pago / Abono</h3>
+                  <p className="text-xs text-slate-500">Habitación {selectedRoom.number} - {selectedRoom.guest_name}</p>
+                </div>
+                <button onClick={() => setShowPaymentModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Fecha del Pago *</label>
-                <input
-                  type="date"
-                  required
-                  value={paymentDate}
-                  onChange={(e) => setPaymentDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
-                />
+              {/* Tarjeta de estado de deuda */}
+              <div className="p-4 bg-slate-50 border border-slate-200/70 rounded-xl space-y-2 text-sm">
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Tarifa del periodo:</span>
+                  <span className="font-semibold">${Number(selectedRoom.price || 0).toLocaleString('de-DE')}</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Saldo pendiente anterior:</span>
+                  <span className="font-semibold text-amber-600">${pendingBal.toLocaleString('de-DE')}</span>
+                </div>
+                <div className="border-t border-slate-200 pt-2 flex justify-between items-center text-base font-bold text-slate-900">
+                  <span>TOTAL DEUDA PENDIENTE:</span>
+                  <span className="text-red-600">${totalPending.toLocaleString('de-DE')}</span>
+                </div>
               </div>
 
-              <p className="text-xs text-slate-400">
-                Al registrar el abono se extenderá la fecha de cobro automáticamente según el tipo de pago del huésped ({selectedRoom.payment_type}).
-              </p>
-
+              {/* Botón rápido 1-Clic Pago Completo */}
               <button
-                type="submit"
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
+                type="button"
+                onClick={() => submitPayment(totalPending > 0 ? totalPending : Number(selectedRoom.price || 0), paymentDate)}
+                className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2"
               >
-                Confirmar Pago
+                <span>⚡ Pago Completo (${(totalPending > 0 ? totalPending : Number(selectedRoom.price || 0)).toLocaleString('de-DE')})</span>
               </button>
-            </form>
-          </div>
-        </div>
-      )}
 
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-slate-200"></div>
+                <span className="flex-shrink mx-3 text-xs text-slate-400 font-semibold uppercase">O registrar abono parcial</span>
+                <div className="flex-grow border-t border-slate-200"></div>
+              </div>
+
+              <form onSubmit={handleRegisterPayment} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Caja para ingresar Abono ($) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={paymentAmount}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\./g, '');
+                      if (!isNaN(Number(raw)) || raw === '') {
+                        const formatted = raw ? Number(raw).toLocaleString('de-DE') : '';
+                        setPaymentAmount(formatted);
+                      }
+                    }}
+                    placeholder={`Ingresa valor parcial (ej. 10.000)`}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-medium text-slate-800"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Fecha del Pago *</label>
+                  <input
+                    type="date"
+                    required
+                    value={paymentDate}
+                    onChange={(e) => setPaymentDate(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
+                >
+                  Confirmar Abono
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* --- MODAL CREAR HABITACIÓN --- */}
       {showAddRoomModal && (
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
@@ -844,6 +963,7 @@ export default function Hotel2() {
         </div>
       )}
 
+      {/* --- MODAL REGISTRAR TRANSACCIÓN MANUAL (Ingreso/Gasto) --- */}
       {showAddTxModal && (
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
@@ -905,7 +1025,7 @@ export default function Hotel2() {
                 </div>
               )}
 
-              <div className="space-y-1">
+               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Monto ($) *</label>
                 <input
                   type="text"
@@ -955,18 +1075,19 @@ export default function Hotel2() {
           </div>
         </div>
       )}
+
       {/* --- MODAL GESTIONAR HABITACIONES --- */}
       {showRoomsModal && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 max-h-[85vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/70 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-5 sm:p-8 space-y-6 max-h-[85vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-2xl font-bold text-slate-900">Estado de Habitaciones</h3>
-                <p className="text-slate-500 text-sm">Selecciona una habitación para ver detalles, realizar check-in, cobros o check-out.</p>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Estado de Habitaciones</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">Selecciona una habitación para ver detalles, realizar check-in, cobros o check-out.</p>
               </div>
               <button 
                 onClick={() => setShowRoomsModal(false)} 
-                className="p-1 text-slate-400 bg-slate-100 hover:text-slate-600 rounded-lg"
+                className="p-1 text-slate-400 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:text-slate-600 dark:hover:text-white rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -979,10 +1100,10 @@ export default function Hotel2() {
                   onClick={() => setSelectedRoom(room)}
                   className={`p-5 rounded-2xl border text-left flex flex-col justify-between h-40 transition-all hover:scale-[1.01] hover:shadow-xs active:scale-[0.99] ${
                     room.status === 'Libre'
-                      ? 'bg-white border-slate-200 text-slate-800'
-                      : room.status === 'Ocupada'
-                      ? 'bg-red-50/40 border-red-200 text-red-950'
-                      : 'bg-amber-50/50 border-amber-200 text-amber-950 animate-pulse'
+                      ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
+                      : (room.total_pending || 0) > 0
+                      ? 'bg-amber-50/50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 shadow-xs'
+                      : 'bg-red-50/40 dark:bg-red-950/40 border-red-200 dark:border-red-900/60 text-red-950 dark:text-red-200'
                   }`}
                 >
                   <div className="w-full flex justify-between items-start">
@@ -990,21 +1111,25 @@ export default function Hotel2() {
                     <span className={`w-3.5 h-3.5 rounded-full border ${
                       room.status === 'Libre'
                         ? 'bg-emerald-500 border-emerald-600'
-                        : room.status === 'Ocupada'
-                        ? 'bg-red-500 border-red-600'
-                        : 'bg-amber-500 border-amber-600'
+                        : (room.total_pending || 0) > 0
+                        ? 'bg-amber-500 border-amber-600'
+                        : 'bg-emerald-500 border-emerald-600'
                     }`} />
                   </div>
                   <div className="space-y-1">
-                    <span className="text-xs font-semibold text-slate-450 uppercase block">Tarifa diaria</span>
+                    <span className="text-xs font-semibold text-slate-450 dark:text-slate-400 uppercase block">Tarifa diaria</span>
                     <span className="text-lg font-bold">${Number(room.price || 0).toLocaleString('de-DE')}</span>
                     {room.guest_name && (
                       <div className="flex flex-col space-y-1 mt-1.5">
                         <span className="text-xs font-medium block truncate max-w-[120px]">👤 {room.guest_name}</span>
-                        {room.status === 'Ocupada' ? (
-                          <span className="inline-flex items-center text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-md self-start">Al día</span>
+                        {(room.total_pending || 0) > 0 ? (
+                          <span className="inline-flex items-center text-[9px] font-bold text-red-650 dark:text-red-400 bg-red-50 dark:bg-red-950/60 border border-red-100 dark:border-red-900/60 px-1.5 py-0.5 rounded-md self-start">
+                            🔴 Debe ${Number(room.total_pending).toLocaleString('de-DE')}
+                          </span>
                         ) : (
-                          <span className="inline-flex items-center text-[9px] font-bold text-red-655 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-md self-start animate-pulse">Debe pago</span>
+                          <span className="inline-flex items-center text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/60 px-1.5 py-0.5 rounded-md self-start">
+                            🟢 Al día
+                          </span>
                         )}
                       </div>
                     )}
@@ -1015,6 +1140,7 @@ export default function Hotel2() {
           </div>
         </div>
       )}
+
       {/* --- MODAL EDITAR HABITACIÓN Y HUÉSPED --- */}
       {showEditModal && selectedRoom && (
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
@@ -1022,7 +1148,7 @@ export default function Hotel2() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-xl font-bold text-slate-900">Editar Habitación {selectedRoom.number}</h3>
-                <p className="text-xs text-slate-500">Modifica la información de la habitación y del huésped.</p>
+                <p className="text-xs text-slate-500">Modifica la información de la habitación, del huésped o el saldo pendiente.</p>
               </div>
               <button onClick={() => setShowEditModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
                 <X className="w-5 h-5" />
@@ -1077,7 +1203,7 @@ export default function Hotel2() {
                 </div>
               </div>
 
-              {/* Sección Huésped (Si la habitación está ocupada o tiene datos de huésped) */}
+              {/* Sección Huésped */}
               {(selectedRoom.status !== 'Libre' || selectedRoom.guest_name) && (
                 <div className="space-y-4 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
                   <h4 className="font-semibold text-indigo-900 text-sm flex items-center gap-2">
@@ -1139,15 +1265,33 @@ export default function Hotel2() {
                     </select>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Próxima Fecha de Cobro *</label>
-                    <input
-                      type="date"
-                      required
-                      value={editForm.next_payment_date}
-                      onChange={(e) => setEditForm({ ...editForm, next_payment_date: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Próxima Fecha *</label>
+                      <input
+                        type="date"
+                        required
+                        value={editForm.next_payment_date}
+                        onChange={(e) => setEditForm({ ...editForm, next_payment_date: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Saldo Pendiente ($)</label>
+                      <input
+                        type="text"
+                        value={editForm.pending_balance}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\./g, '');
+                          if (!isNaN(Number(raw)) || raw === '') {
+                            const formatted = raw ? Number(raw).toLocaleString('de-DE') : '';
+                            setEditForm({ ...editForm, pending_balance: formatted });
+                          }
+                        }}
+                        placeholder="0"
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 font-semibold text-amber-600"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -1162,7 +1306,7 @@ export default function Hotel2() {
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
+                  className="w-1/2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
                 >
                   Guardar Cambios
                 </button>

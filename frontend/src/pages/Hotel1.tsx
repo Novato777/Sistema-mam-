@@ -42,6 +42,10 @@ interface Room {
   check_in_date?: string;
   payment_type?: string;
   next_payment_date?: string;
+  pending_balance?: number;
+  total_pending?: number;
+  accrued_periods?: number;
+  accrued_amount?: number;
 }
 
 interface DashboardData {
@@ -84,7 +88,8 @@ export default function Hotel1() {
     guest_document: '',
     guest_phone: '',
     payment_type: 'Pago diario',
-    next_payment_date: getTodayString()
+    next_payment_date: getTodayString(),
+    pending_balance: ''
   });
 
   // Formulario Asignación Huésped
@@ -93,7 +98,8 @@ export default function Hotel1() {
     document: '',
     phone: '',
     checkInDate: getTodayString(),
-    paymentType: 'Pago diario'
+    paymentType: 'Pago diario',
+    initialPayment: ''
   });
 
   // Formulario Registrar Pago
@@ -155,13 +161,20 @@ export default function Hotel1() {
     if (!selectedRoom) return;
 
     try {
+      const initialPayVal = guestForm.initialPayment
+        ? parseFloat(guestForm.initialPayment.replace(/\./g, ''))
+        : undefined;
+
       const response = await fetch(`${API_URL}/api/hotel-1/rooms/${selectedRoom.id}/guest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(guestForm)
+        body: JSON.stringify({
+          ...guestForm,
+          initialPayment: initialPayVal
+        })
       });
 
       if (!response.ok) {
@@ -176,7 +189,8 @@ export default function Hotel1() {
         document: '',
         phone: '',
         checkInDate: getTodayString(),
-        paymentType: 'Pago diario'
+        paymentType: 'Pago diario',
+        initialPayment: ''
       });
       fetchData();
     } catch (err: any) {
@@ -184,9 +198,12 @@ export default function Hotel1() {
     }
   };
 
-  const handleRegisterPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitPayment = async (amountNum: number, pDate: string) => {
     if (!selectedRoom) return;
+    if (isNaN(amountNum) || amountNum <= 0) {
+      alert('Por favor ingrese un monto válido mayor a cero.');
+      return;
+    }
 
     try {
       const response = await fetch(`${API_URL}/api/hotel-1/rooms/${selectedRoom.id}/payment`, {
@@ -196,8 +213,8 @@ export default function Hotel1() {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          amount: parseFloat(paymentAmount.replace(/\./g, '')),
-          date: paymentDate
+          amount: amountNum,
+          date: pDate
         })
       });
 
@@ -215,6 +232,12 @@ export default function Hotel1() {
     }
   };
 
+  const handleRegisterPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsedAmount = parseFloat(paymentAmount.replace(/\./g, ''));
+    await submitPayment(parsedAmount, paymentDate);
+  };
+
   const openEditModal = (room: Room) => {
     setSelectedRoom(room);
     setEditForm({
@@ -225,7 +248,8 @@ export default function Hotel1() {
       guest_document: room.guest_document || '',
       guest_phone: room.guest_phone || '',
       payment_type: room.payment_type || 'Pago diario',
-      next_payment_date: room.next_payment_date || getTodayString()
+      next_payment_date: room.next_payment_date || getTodayString(),
+      pending_balance: room.pending_balance !== undefined ? Number(room.pending_balance).toLocaleString('de-DE') : '0'
     });
     setShowEditModal(true);
   };
@@ -249,7 +273,8 @@ export default function Hotel1() {
           guest_document: editForm.guest_document,
           guest_phone: editForm.guest_phone,
           payment_type: editForm.payment_type,
-          next_payment_date: editForm.next_payment_date
+          next_payment_date: editForm.next_payment_date,
+          pending_balance: parseFloat(editForm.pending_balance.replace(/\./g, '')) || 0
         })
       });
 
@@ -396,7 +421,7 @@ export default function Hotel1() {
             <span className="p-2 bg-emerald-500 text-white rounded-2xl border border-emerald-600 shadow-sm"><Building2 className="w-6 h-6" /></span>
             Hotel 1
           </h1>
-          <p className="text-slate-655 dark:text-slate-400 text-sm">Dashboard operativo y control de habitaciones.</p>
+          <p className="text-slate-655 dark:text-slate-400 text-sm">Dashboard operativo y control de habitaciones con abonos.</p>
         </div>
 
         <div className="flex gap-3">
@@ -478,7 +503,7 @@ export default function Hotel1() {
             <Building2 className="w-5 h-5 text-emerald-500" />
             Estado de Habitaciones
           </h2>
-          <p className="text-slate-550 dark:text-slate-400 text-sm">Administra las habitaciones libres, ocupadas y registra huéspedes.</p>
+          <p className="text-slate-550 dark:text-slate-400 text-sm">Administra habitaciones, registra abonos y verifica saldos pendientes.</p>
         </div>
         <button
           onClick={() => setShowRoomsModal(true)}
@@ -629,6 +654,24 @@ export default function Hotel1() {
                       <span className="text-slate-400 block text-xs uppercase font-semibold">Próximo Cobro</span>
                       <span className="font-semibold text-amber-600">{selectedRoom.next_payment_date}</span>
                     </div>
+                    <div>
+                      <span className="text-slate-400 block text-xs uppercase font-semibold">Saldo Pendiente Anterior</span>
+                      <span className="font-semibold text-amber-600">${Number(selectedRoom.pending_balance || 0).toLocaleString('de-DE')}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-xs uppercase font-semibold">Total Cobro Pendiente</span>
+                      <span className="font-bold text-red-600">${
+                        (() => {
+                          const pendingBal = Number(selectedRoom.pending_balance || 0);
+                          const today = getTodayString();
+                          const isDue = selectedRoom.status === 'Pendiente de pago' || (selectedRoom.next_payment_date && selectedRoom.next_payment_date <= today);
+                          const calculated = (selectedRoom.total_pending !== undefined && selectedRoom.total_pending !== null && selectedRoom.total_pending > 0)
+                            ? selectedRoom.total_pending
+                            : (isDue ? (pendingBal > 0 ? pendingBal + Number(selectedRoom.price || 0) : Number(selectedRoom.price || 0)) : pendingBal);
+                          return calculated.toLocaleString('de-DE');
+                        })()
+                      }</span>
+                    </div>
                   </div>
                 </div>
 
@@ -731,6 +774,33 @@ export default function Hotel1() {
                 </select>
               </div>
 
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Abono / Pago Inicial ($)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={guestForm.initialPayment}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\./g, '');
+                      if (!isNaN(Number(raw)) || raw === '') {
+                        const formatted = raw ? Number(raw).toLocaleString('de-DE') : '';
+                        setGuestForm({ ...guestForm, initialPayment: formatted });
+                      }
+                    }}
+                    placeholder={`Por defecto completo: $${Number(selectedRoom.price || 0).toLocaleString('de-DE')}`}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setGuestForm({ ...guestForm, initialPayment: Number(selectedRoom.price || 0).toLocaleString('de-DE') })}
+                    className="px-3 py-2 text-xs font-semibold bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-xl whitespace-nowrap transition-all"
+                  >
+                    Pago Completo
+                  </button>
+                </div>
+                <span className="text-[11px] text-slate-400">Si el huésped realiza un abono parcial, la diferencia se guardará automáticamente como saldo pendiente.</span>
+              </div>
+
               <button
                 type="submit"
                 className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
@@ -743,60 +813,99 @@ export default function Hotel1() {
       )}
 
       {/* --- MODAL REGISTRAR PAGO --- */}
-      {showPaymentModal && selectedRoom && (
-        <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex justify-between items-start">
-              <h3 className="text-xl font-bold text-slate-900">Registrar Pago / Abono</h3>
-              <button onClick={() => setShowPaymentModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {showPaymentModal && selectedRoom && (() => {
+        const pendingBal = Number(selectedRoom.pending_balance || 0);
+        const today = getTodayString();
+        const isDue = selectedRoom.status === 'Pendiente de pago' || (selectedRoom.next_payment_date && selectedRoom.next_payment_date <= today);
+        const totalPending = (selectedRoom.total_pending !== undefined && selectedRoom.total_pending !== null && selectedRoom.total_pending > 0)
+          ? selectedRoom.total_pending
+          : (isDue ? (pendingBal > 0 ? pendingBal + Number(selectedRoom.price || 0) : Number(selectedRoom.price || 0)) : pendingBal);
 
-            <form onSubmit={handleRegisterPayment} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Valor recibido ($) *</label>
-                <input
-                  type="text"
-                  required
-                  value={paymentAmount}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/\./g, '');
-                    if (!isNaN(Number(raw)) || raw === '') {
-                      const formatted = raw ? Number(raw).toLocaleString('de-DE') : '';
-                      setPaymentAmount(formatted);
-                    }
-                  }}
-                  placeholder={`Tarifa sugerida: $${Number(selectedRoom.price || 0).toLocaleString('de-DE')}`}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
-                />
+        return (
+          <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">Registrar Pago / Abono</h3>
+                  <p className="text-xs text-slate-500">Habitación {selectedRoom.number} - {selectedRoom.guest_name}</p>
+                </div>
+                <button onClick={() => setShowPaymentModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Fecha del Pago *</label>
-                <input
-                  type="date"
-                  required
-                  value={paymentDate}
-                  onChange={(e) => setPaymentDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
-                />
+              {/* Tarjeta de estado de deuda */}
+              <div className="p-4 bg-slate-50 border border-slate-200/70 rounded-xl space-y-2 text-sm">
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Tarifa del periodo:</span>
+                  <span className="font-semibold">${Number(selectedRoom.price || 0).toLocaleString('de-DE')}</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Saldo pendiente anterior:</span>
+                  <span className="font-semibold text-amber-600">${pendingBal.toLocaleString('de-DE')}</span>
+                </div>
+                <div className="border-t border-slate-200 pt-2 flex justify-between items-center text-base font-bold text-slate-900">
+                  <span>TOTAL DEUDA PENDIENTE:</span>
+                  <span className="text-red-600">${totalPending.toLocaleString('de-DE')}</span>
+                </div>
               </div>
 
-              <p className="text-xs text-slate-400">
-                Al registrar el abono se extenderá la fecha de cobro automáticamente según el tipo de pago del huésped ({selectedRoom.payment_type}).
-              </p>
-
+              {/* Botón rápido 1-Clic Pago Completo */}
               <button
-                type="submit"
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
+                type="button"
+                onClick={() => submitPayment(totalPending > 0 ? totalPending : Number(selectedRoom.price || 0), paymentDate)}
+                className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2"
               >
-                Confirmar Pago
+                <span>⚡ Pago Completo (${(totalPending > 0 ? totalPending : Number(selectedRoom.price || 0)).toLocaleString('de-DE')})</span>
               </button>
-            </form>
+
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-slate-200"></div>
+                <span className="flex-shrink mx-3 text-xs text-slate-400 font-semibold uppercase">O registrar abono parcial</span>
+                <div className="flex-grow border-t border-slate-200"></div>
+              </div>
+
+              <form onSubmit={handleRegisterPayment} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Caja para ingresar Abono ($) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={paymentAmount}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\./g, '');
+                      if (!isNaN(Number(raw)) || raw === '') {
+                        const formatted = raw ? Number(raw).toLocaleString('de-DE') : '';
+                        setPaymentAmount(formatted);
+                      }
+                    }}
+                    placeholder={`Ingresa valor parcial (ej. 10.000)`}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-medium text-slate-800"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Fecha del Pago *</label>
+                  <input
+                    type="date"
+                    required
+                    value={paymentDate}
+                    onChange={(e) => setPaymentDate(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl text-sm shadow-xs transition-all active:scale-[0.99]"
+                >
+                  Confirmar Abono
+                </button>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* --- MODAL CREAR HABITACIÓN --- */}
       {showAddRoomModal && (
@@ -974,6 +1083,7 @@ export default function Hotel1() {
           </div>
         </div>
       )}
+
       {/* --- MODAL GESTIONAR HABITACIONES --- */}
       {showRoomsModal && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-950/70 backdrop-blur-xs animate-fade-in">
@@ -999,9 +1109,9 @@ export default function Hotel1() {
                   className={`p-5 rounded-2xl border text-left flex flex-col justify-between h-40 transition-all hover:scale-[1.01] hover:shadow-xs active:scale-[0.99] ${
                     room.status === 'Libre'
                       ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
-                      : room.status === 'Ocupada'
-                      ? 'bg-red-50/40 dark:bg-red-950/40 border-red-200 dark:border-red-900/60 text-red-950 dark:text-red-200'
-                      : 'bg-amber-50/50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 animate-pulse'
+                      : (room.total_pending || 0) > 0
+                      ? 'bg-amber-50/50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 shadow-xs'
+                      : 'bg-red-50/40 dark:bg-red-950/40 border-red-200 dark:border-red-900/60 text-red-950 dark:text-red-200'
                   }`}
                 >
                   <div className="w-full flex justify-between items-start">
@@ -1009,9 +1119,9 @@ export default function Hotel1() {
                     <span className={`w-3.5 h-3.5 rounded-full border ${
                       room.status === 'Libre'
                         ? 'bg-emerald-500 border-emerald-600'
-                        : room.status === 'Ocupada'
-                        ? 'bg-red-500 border-red-600'
-                        : 'bg-amber-500 border-amber-600'
+                        : (room.total_pending || 0) > 0
+                        ? 'bg-amber-500 border-amber-600'
+                        : 'bg-emerald-500 border-emerald-600'
                     }`} />
                   </div>
                   <div className="space-y-1">
@@ -1020,10 +1130,14 @@ export default function Hotel1() {
                     {room.guest_name && (
                       <div className="flex flex-col space-y-1 mt-1.5">
                         <span className="text-xs font-medium block truncate max-w-[120px]">👤 {room.guest_name}</span>
-                        {room.status === 'Ocupada' ? (
-                          <span className="inline-flex items-center text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/60 px-1.5 py-0.5 rounded-md self-start">Al día</span>
+                        {(room.total_pending || 0) > 0 ? (
+                          <span className="inline-flex items-center text-[9px] font-bold text-red-650 dark:text-red-400 bg-red-50 dark:bg-red-950/60 border border-red-100 dark:border-red-900/60 px-1.5 py-0.5 rounded-md self-start">
+                            🔴 Debe ${Number(room.total_pending).toLocaleString('de-DE')}
+                          </span>
                         ) : (
-                          <span className="inline-flex items-center text-[9px] font-bold text-red-650 dark:text-red-400 bg-red-50 dark:bg-red-950/60 border border-red-100 dark:border-red-900/60 px-1.5 py-0.5 rounded-md self-start animate-pulse">Debe pago</span>
+                          <span className="inline-flex items-center text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/60 px-1.5 py-0.5 rounded-md self-start">
+                            🟢 Al día
+                          </span>
                         )}
                       </div>
                     )}
@@ -1034,6 +1148,7 @@ export default function Hotel1() {
           </div>
         </div>
       )}
+
       {/* --- MODAL EDITAR HABITACIÓN Y HUÉSPED --- */}
       {showEditModal && selectedRoom && (
         <div className="fixed inset-0 z-55 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
@@ -1041,7 +1156,7 @@ export default function Hotel1() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-xl font-bold text-slate-900">Editar Habitación {selectedRoom.number}</h3>
-                <p className="text-xs text-slate-500">Modifica la información de la habitación y del huésped.</p>
+                <p className="text-xs text-slate-500">Modifica la información de la habitación, del huésped o el saldo pendiente.</p>
               </div>
               <button onClick={() => setShowEditModal(false)} className="p-1 text-slate-450 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg">
                 <X className="w-5 h-5" />
@@ -1158,15 +1273,33 @@ export default function Hotel1() {
                     </select>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Próxima Fecha de Cobro *</label>
-                    <input
-                      type="date"
-                      required
-                      value={editForm.next_payment_date}
-                      onChange={(e) => setEditForm({ ...editForm, next_payment_date: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Próxima Fecha *</label>
+                      <input
+                        type="date"
+                        required
+                        value={editForm.next_payment_date}
+                        onChange={(e) => setEditForm({ ...editForm, next_payment_date: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-slate-650 uppercase tracking-wider">Saldo Pendiente ($)</label>
+                      <input
+                        type="text"
+                        value={editForm.pending_balance}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\./g, '');
+                          if (!isNaN(Number(raw)) || raw === '') {
+                            const formatted = raw ? Number(raw).toLocaleString('de-DE') : '';
+                            setEditForm({ ...editForm, pending_balance: formatted });
+                          }
+                        }}
+                        placeholder="0"
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 font-semibold text-amber-600"
+                      />
+                    </div>
                   </div>
                 </div>
               )}

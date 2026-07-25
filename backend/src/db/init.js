@@ -38,9 +38,16 @@ const initDatabase = async () => {
         check_in_date TEXT NOT NULL,
         payment_type TEXT NOT NULL, -- Pago diario, Pago cada 3 días, Pago semanal
         next_payment_date TEXT NOT NULL,
+        pending_balance ${numType} DEFAULT 0,
         FOREIGN KEY (room_id) REFERENCES hotel1_rooms (id) ON DELETE CASCADE
       )
     `);
+
+    try {
+      await run(`ALTER TABLE hotel1_guests ADD COLUMN pending_balance ${numType} DEFAULT 0`);
+    } catch (e) {
+      // Ignorar si la columna ya existe
+    }
 
     await run(`
       CREATE TABLE IF NOT EXISTS hotel1_transactions (
@@ -74,9 +81,16 @@ const initDatabase = async () => {
         check_in_date TEXT NOT NULL,
         payment_type TEXT NOT NULL,
         next_payment_date TEXT NOT NULL,
+        pending_balance ${numType} DEFAULT 0,
         FOREIGN KEY (room_id) REFERENCES hotel2_rooms (id) ON DELETE CASCADE
       )
     `);
+
+    try {
+      await run(`ALTER TABLE hotel2_guests ADD COLUMN pending_balance ${numType} DEFAULT 0`);
+    } catch (e) {
+      // Ignorar si la columna ya existe
+    }
 
     await run(`
       CREATE TABLE IF NOT EXISTS hotel2_transactions (

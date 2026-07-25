@@ -1,22 +1,68 @@
 const db = require('../config/db');
-const { getTodayString, formatDate } = require('../utils/date');
+const { getTodayString, formatDate, addDaysToDateStr, getDaysDifference } = require('../utils/date');
 
-// Función para actualizar automáticamente el estado de las habitaciones ocupadas a 'Pendiente de pago' si la fecha de próximo pago ya venció.
+// Helper: Obtener intervalo en días según el tipo de pago
+const getPaymentIntervalDays = (paymentType) => {
+  if (paymentType === 'Pago cada 3 días') return 3;
+  if (paymentType === 'Pago semanal') return 7;
+  return 1; // Default 'Pago diario'
+};
+
+// Helper: Calcular el saldo pendiente total (deuda acumulada + periodos transcurridos)
+const calculateGuestPendingInfo = (guest, roomPrice) => {
+  if (!guest) {
+    return { pendingBalance: 0, accruedPeriods: 0, accruedAmount: 0, totalPending: 0 };
+  }
+
+  const today = getTodayString();
+  const pendingBalance = Number(guest.pending_balance || 0);
+  const nextPayment = guest.next_payment_date;
+  const interval = getPaymentIntervalDays(guest.payment_type);
+
+  if (nextPayment && nextPayment <= today) {
+    const diffDays = Math.max(0, getDaysDifference(nextPayment, today));
+    const accruedPeriods = Math.floor(diffDays / interval) + 1;
+    const accruedAmount = accruedPeriods * Number(roomPrice || 0);
+    const totalPending = pendingBalance + accruedAmount;
+
+    return {
+      pendingBalance,
+      accruedPeriods,
+      accruedAmount,
+      totalPending
+    };
+  }
+
+  return {
+    pendingBalance,
+    accruedPeriods: 0,
+    accruedAmount: 0,
+    totalPending: pendingBalance
+  };
+};
+
+// Función para actualizar automáticamente el estado de las habitaciones ocupadas a 'Pendiente de pago' si la fecha de próximo pago ya venció o hay saldo pendiente.
 const checkAndUpdatePaymentStatus = async () => {
   try {
     const today = getTodayString();
     
-    // Obtener huéspedes cuya fecha de próximo pago es menor que hoy (vencido) y cuya habitación sigue marcada como 'Ocupada'
-    const expiredGuests = await db.query(`
-      SELECT g.id, g.room_id, g.next_payment_date 
+    const guests = await db.query(`
+      SELECT g.*, r.price as room_price, r.status as room_status
       FROM hotel1_guests g
       JOIN hotel1_rooms r ON g.room_id = r.id
-      WHERE g.next_payment_date < ? AND r.status = 'Ocupada'
-    `, [today]);
+    `);
 
-    for (const guest of expiredGuests) {
-      // Cambiar estado a 'Pendiente de pago'
-      await db.run("UPDATE hotel1_rooms SET status = 'Pendiente de pago' WHERE id = ?", [guest.room_id]);
+    for (const guest of guests) {
+      const pendingInfo = calculateGuestPendingInfo(guest, guest.room_price);
+      if (pendingInfo.totalPending > 0 || guest.next_payment_date <= today) {
+        if (guest.room_status !== 'Pendiente de pago') {
+          await db.run("UPDATE hotel1_rooms SET status = 'Pendiente de pago' WHERE id = ?", [guest.room_id]);
+        }
+      } else {
+        if (guest.room_status !== 'Ocupada') {
+          await db.run("UPDATE hotel1_rooms SET status = 'Ocupada' WHERE id = ?", [guest.room_id]);
+        }
+      }
     }
   } catch (error) {
     console.error('Error al verificar vencimientos de pago del Hotel 1:', error);
@@ -75,14 +121,46 @@ exports.getDashboard = async (req, res) => {
 exports.getRooms = async (req, res) => {
   try {
     await checkAndUpdatePaymentStatus();
-    // Traer habitaciones y su información de huésped si está ocupada
+    const today = getTodayString();
+
     const rooms = await db.query(`
-      SELECT r.*, g.name as guest_name, g.phone as guest_phone, g.check_in_date, g.payment_type, g.next_payment_date, g.document as guest_document
+      SELECT r.*, g.name as guest_name, g.phone as guest_phone, g.check_in_date, g.payment_type, g.next_payment_date, g.document as guest_document, g.pending_balance, g.id as guest_id
       FROM hotel1_rooms r
       LEFT JOIN hotel1_guests g ON r.id = g.room_id
       ORDER BY r.number ASC
     `);
-    res.json(rooms);
+
+    const formattedRooms = rooms.map((room) => {
+      if (room.guest_name) {
+        const guestObj = {
+          pending_balance: room.pending_balance,
+          next_payment_date: room.next_payment_date,
+          payment_type: room.payment_type
+        };
+        const pendingInfo = calculateGuestPendingInfo(guestObj, room.price);
+        const displayNextPaymentDate = (room.next_payment_date && room.next_payment_date <= today)
+          ? today
+          : room.next_payment_date;
+
+        return {
+          ...room,
+          next_payment_date: displayNextPaymentDate,
+          pending_balance: Number(room.pending_balance || 0),
+          total_pending: pendingInfo.totalPending,
+          accrued_periods: pendingInfo.accruedPeriods,
+          accrued_amount: pendingInfo.accruedAmount
+        };
+      }
+      return {
+        ...room,
+        pending_balance: 0,
+        total_pending: 0,
+        accrued_periods: 0,
+        accrued_amount: 0
+      };
+    });
+
+    res.json(formattedRooms);
   } catch (error) {
     res.status(500).json({ error: 'Error al listar habitaciones.' });
   }
@@ -115,7 +193,7 @@ exports.getRoomDetail = async (req, res) => {
   try {
     await checkAndUpdatePaymentStatus();
     const room = await db.get(`
-      SELECT r.*, g.name as guest_name, g.phone as guest_phone, g.check_in_date, g.payment_type, g.next_payment_date, g.document as guest_document, g.id as guest_id
+      SELECT r.*, g.name as guest_name, g.phone as guest_phone, g.check_in_date, g.payment_type, g.next_payment_date, g.document as guest_document, g.pending_balance, g.id as guest_id
       FROM hotel1_rooms r
       LEFT JOIN hotel1_guests g ON r.id = g.room_id
       WHERE r.id = ?
@@ -124,6 +202,29 @@ exports.getRoomDetail = async (req, res) => {
     if (!room) {
       return res.status(404).json({ error: 'Habitación no encontrada.' });
     }
+
+    if (room.guest_name) {
+      const today = getTodayString();
+      const guestObj = {
+        pending_balance: room.pending_balance,
+        next_payment_date: room.next_payment_date,
+        payment_type: room.payment_type
+      };
+      const pendingInfo = calculateGuestPendingInfo(guestObj, room.price);
+      if (room.next_payment_date && room.next_payment_date <= today) {
+        room.next_payment_date = today;
+      }
+      room.pending_balance = Number(room.pending_balance || 0);
+      room.total_pending = pendingInfo.totalPending;
+      room.accrued_periods = pendingInfo.accruedPeriods;
+      room.accrued_amount = pendingInfo.accruedAmount;
+    } else {
+      room.pending_balance = 0;
+      room.total_pending = 0;
+      room.accrued_periods = 0;
+      room.accrued_amount = 0;
+    }
+
     res.json(room);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener detalle de la habitación.' });
@@ -133,7 +234,7 @@ exports.getRoomDetail = async (req, res) => {
 // Habitaciones: Editar Habitación y Huésped
 exports.updateRoom = async (req, res) => {
   const { id } = req.params;
-  const { number, price, observations, guest_name, guest_document, guest_phone, payment_type, next_payment_date } = req.body;
+  const { number, price, observations, guest_name, guest_document, guest_phone, payment_type, next_payment_date, pending_balance } = req.body;
 
   if (!number || price === undefined || price === null || price === '') {
     return res.status(400).json({ error: 'Número de habitación y precio son obligatorios.' });
@@ -145,25 +246,25 @@ exports.updateRoom = async (req, res) => {
       return res.status(404).json({ error: 'Habitación no encontrada.' });
     }
 
-    // Actualizar habitación
     await db.run(
       'UPDATE hotel1_rooms SET number = ?, price = ?, observations = ? WHERE id = ?',
       [number, price, observations || '', id]
     );
 
-    // Verificar si hay un huésped en la habitación
     const existingGuest = await db.get('SELECT * FROM hotel1_guests WHERE room_id = ?', [id]);
     if (existingGuest && guest_name) {
       const today = getTodayString();
       const updatedNextPayment = next_payment_date || existingGuest.next_payment_date;
+      const updatedPendingBalance = pending_balance !== undefined && pending_balance !== null && pending_balance !== ''
+        ? parseFloat(pending_balance)
+        : Number(existingGuest.pending_balance || 0);
 
       await db.run(
-        'UPDATE hotel1_guests SET name = ?, document = ?, phone = ?, payment_type = ?, next_payment_date = ? WHERE room_id = ?',
-        [guest_name, guest_document || '', guest_phone || '', payment_type || existingGuest.payment_type, updatedNextPayment, id]
+        'UPDATE hotel1_guests SET name = ?, document = ?, phone = ?, payment_type = ?, next_payment_date = ?, pending_balance = ? WHERE room_id = ?',
+        [guest_name, guest_document || '', guest_phone || '', payment_type || existingGuest.payment_type, updatedNextPayment, updatedPendingBalance, id]
       );
 
-      // Si la fecha de próximo cobro cambió o se actualizó, ajustar el estado de la habitación
-      if (updatedNextPayment < today) {
+      if (updatedNextPayment < today || updatedPendingBalance > 0) {
         await db.run("UPDATE hotel1_rooms SET status = 'Pendiente de pago' WHERE id = ?", [id]);
       } else {
         await db.run("UPDATE hotel1_rooms SET status = 'Ocupada' WHERE id = ?", [id]);
@@ -183,14 +284,13 @@ exports.updateRoom = async (req, res) => {
 // Habitaciones: Asignar Huésped (Check-in)
 exports.assignGuest = async (req, res) => {
   const { roomId } = req.params;
-  const { name, document, phone, checkInDate, paymentType } = req.body;
+  const { name, document, phone, checkInDate, paymentType, initialPayment } = req.body;
 
   if (!name || !checkInDate || !paymentType) {
     return res.status(400).json({ error: 'Nombre del huésped, fecha de ingreso y tipo de pago son obligatorios.' });
   }
 
   try {
-    // Verificar si la habitación existe y está libre
     const room = await db.get('SELECT * FROM hotel1_rooms WHERE id = ?', [roomId]);
     if (!room) {
       return res.status(404).json({ error: 'Habitación no encontrada.' });
@@ -199,36 +299,34 @@ exports.assignGuest = async (req, res) => {
       return res.status(400).json({ error: 'La habitación no está libre.' });
     }
 
-    // Calcular próxima fecha de pago
-    const checkIn = new Date(checkInDate);
-    let nextPayment = new Date(checkIn);
+    const interval = getPaymentIntervalDays(paymentType);
+    const nextPaymentStr = addDaysToDateStr(checkInDate, interval);
 
-    if (paymentType === 'Pago diario') {
-      nextPayment.setDate(checkIn.getDate() + 1);
-    } else if (paymentType === 'Pago cada 3 días') {
-      nextPayment.setDate(checkIn.getDate() + 3);
-    } else if (paymentType === 'Pago semanal') {
-      nextPayment.setDate(checkIn.getDate() + 7);
-    } else {
-      return res.status(400).json({ error: 'Tipo de pago inválido.' });
+    // Calcular el monto pagado inicialmente (abono o pago completo)
+    const paidAmount = (initialPayment !== undefined && initialPayment !== null && initialPayment !== '')
+      ? parseFloat(initialPayment)
+      : parseFloat(room.price);
+
+    const pendingBalance = Math.max(0, parseFloat(room.price) - paidAmount);
+    const roomStatus = pendingBalance > 0 ? 'Pendiente de pago' : 'Ocupada';
+
+    await db.run(
+      'INSERT INTO hotel1_guests (room_id, name, document, phone, check_in_date, payment_type, next_payment_date, pending_balance) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [roomId, name, document || '', phone || '', checkInDate, paymentType, nextPaymentStr, pendingBalance]
+    );
+
+    await db.run('UPDATE hotel1_rooms SET status = ? WHERE id = ?', [roomStatus, roomId]);
+
+    if (paidAmount > 0) {
+      const desc = paidAmount >= room.price
+        ? `Check-in Huésped: ${name} (Hab. ${room.number}) - Pago completo`
+        : `Check-in Huésped: ${name} (Hab. ${room.number}) - Abono inicial`;
+      
+      await db.run(
+        "INSERT INTO hotel1_transactions (type, category, amount, date, description) VALUES ('Ingreso', 'Hospedaje', ?, ?, ?)",
+        [paidAmount, checkInDate, desc]
+      );
     }
-
-    const nextPaymentStr = formatDate(nextPayment);
-
-    // Guardar huésped
-    await db.run(
-      'INSERT INTO hotel1_guests (room_id, name, document, phone, check_in_date, payment_type, next_payment_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [roomId, name, document || '', phone || '', checkInDate, paymentType, nextPaymentStr]
-    );
-
-    // Actualizar estado de la habitación
-    await db.run("UPDATE hotel1_rooms SET status = 'Ocupada' WHERE id = ?", [roomId]);
-
-    // Registrar ingreso por el hospedaje inicial
-    await db.run(
-      "INSERT INTO hotel1_transactions (type, category, amount, date, description) VALUES ('Ingreso', 'Hospedaje', ?, ?, ?)",
-      [room.price, checkInDate, `Check-in Huésped: ${name} (Hab. ${room.number})`]
-    );
 
     res.json({ message: 'Huésped asignado con éxito.' });
   } catch (error) {
@@ -240,13 +338,14 @@ exports.assignGuest = async (req, res) => {
 // Habitaciones: Registrar Pago del Huésped
 exports.registerPayment = async (req, res) => {
   const { roomId } = req.params;
-  const { amount, date } = req.body; // Monto pagado y fecha
+  const { amount, date } = req.body;
 
-  if (!amount) {
-    return res.status(400).json({ error: 'El valor del pago es obligatorio.' });
+  if (amount === undefined || amount === null || isNaN(Number(amount)) || Number(amount) <= 0) {
+    return res.status(400).json({ error: 'El valor del pago debe ser mayor a cero.' });
   }
 
   const transactionDate = date || getTodayString();
+  const paymentValue = parseFloat(amount);
 
   try {
     const room = await db.get('SELECT * FROM hotel1_rooms WHERE id = ?', [roomId]);
@@ -256,33 +355,48 @@ exports.registerPayment = async (req, res) => {
       return res.status(404).json({ error: 'Habitación o huésped no encontrado.' });
     }
 
-    // Calcular nueva fecha de pago basándose en la fecha actual de próximo pago
-    const currentNextPayment = new Date(guest.next_payment_date);
-    let nextPayment = new Date(currentNextPayment);
+    const pendingInfo = calculateGuestPendingInfo(guest, room.price);
+    const totalPending = pendingInfo.totalPending;
 
-    if (guest.payment_type === 'Pago diario') {
-      nextPayment.setDate(currentNextPayment.getDate() + 1);
-    } else if (guest.payment_type === 'Pago cada 3 días') {
-      nextPayment.setDate(currentNextPayment.getDate() + 3);
-    } else if (guest.payment_type === 'Pago semanal') {
-      nextPayment.setDate(currentNextPayment.getDate() + 7);
+    const newPendingBalance = Math.max(0, totalPending - paymentValue);
+    const today = getTodayString();
+    let updatedNextPaymentStr = guest.next_payment_date;
+
+    if (newPendingBalance === 0) {
+      // Pago completo de toda la deuda pendiente acumulada: avanzar al siguiente ciclo desde hoy
+      const interval = getPaymentIntervalDays(guest.payment_type);
+      updatedNextPaymentStr = addDaysToDateStr(today, interval);
+    } else {
+      // Abono parcial (sigue debiendo): si la fecha de pago está vencida o vence hoy, mantener hoy
+      if (guest.next_payment_date <= today) {
+        updatedNextPaymentStr = today;
+      }
     }
 
-    const nextPaymentStr = formatDate(nextPayment);
+    const roomStatus = newPendingBalance > 0 ? 'Pendiente de pago' : 'Ocupada';
 
-    // Actualizar la fecha de próximo pago del huésped
-    await db.run('UPDATE hotel1_guests SET next_payment_date = ? WHERE room_id = ?', [nextPaymentStr, roomId]);
-
-    // Regresar estado de la habitación a 'Ocupada' si estaba en 'Pendiente de pago'
-    await db.run("UPDATE hotel1_rooms SET status = 'Ocupada' WHERE id = ?", [roomId]);
-
-    // Registrar la transacción de ingreso
     await db.run(
-      "INSERT INTO hotel1_transactions (type, category, amount, date, description) VALUES ('Ingreso', 'Hospedaje', ?, ?, ?)",
-      [amount, transactionDate, `Abono/Pago de hospedaje: ${guest.name} (Hab. ${room.number})`]
+      'UPDATE hotel1_guests SET pending_balance = ?, next_payment_date = ? WHERE room_id = ?',
+      [newPendingBalance, updatedNextPaymentStr, roomId]
     );
 
-    res.json({ message: 'Pago registrado con éxito y fecha de cobro extendida.' });
+    await db.run('UPDATE hotel1_rooms SET status = ? WHERE id = ?', [roomStatus, roomId]);
+
+    const isFullPay = newPendingBalance === 0;
+    const desc = isFullPay
+      ? `Pago total de hospedaje: ${guest.name} (Hab. ${room.number})`
+      : `Abono a hospedaje: ${guest.name} (Hab. ${room.number}) - Pendiente: $${newPendingBalance.toLocaleString('de-DE')}`;
+
+    await db.run(
+      "INSERT INTO hotel1_transactions (type, category, amount, date, description) VALUES ('Ingreso', 'Hospedaje', ?, ?, ?)",
+      [paymentValue, transactionDate, desc]
+    );
+
+    res.json({
+      message: 'Pago/Abono registrado con éxito.',
+      new_pending_balance: newPendingBalance,
+      next_payment_date: updatedNextPaymentStr
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al registrar pago.' });
