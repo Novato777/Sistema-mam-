@@ -42,6 +42,37 @@ body {
   background: #475569;
 }
 
+/* ============================================================
+   TABLAS Y LISTAS CON ALTURA MÁXIMA + SCROLL INTERNO
+   Evita que los módulos crezcan sin fin. El encabezado de la
+   tabla queda fijo arriba mientras se desplazan las filas.
+   ============================================================ */
+.table-scroll,
+.list-scroll {
+  max-height: min(65vh, 600px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll {
+  --th-bg: #f1f5f9;
+}
+.dark .table-scroll {
+  --th-bg: #1e293b;
+}
+.table-scroll.table-scroll-dark {
+  --th-bg: #0f172a;
+}
+
+.table-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--th-bg);
+  box-shadow: inset 0 -1px 0 rgba(100, 116, 139, 0.35);
+}
+
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -69,6 +100,20 @@ body {
 .dark .bg-slate-100 {
   background-color: #1e293b;
   color: #f1f5f9;
+}
+
+/* Colores sólidos más vivos en modo oscuro: los tonos -700 (encabezados,
+   botones, etiquetas de estado) suben un paso de brillo. */
+.dark .bg-emerald-700 { background-color: #059669; }
+.dark .bg-rose-700 { background-color: #e11d48; }
+.dark .bg-amber-700 { background-color: #d97706; }
+.dark .bg-sky-700 { background-color: #0284c7; }
+.dark .bg-indigo-700 { background-color: #4f46e5; }
+.dark .bg-violet-700 { background-color: #7c3aed; }
+.dark .bg-teal-700 { background-color: #0d9488; }
+.dark .bg-purple-700 { background-color: #9333ea; }
+.dark :is(.bg-emerald-700, .bg-rose-700, .bg-amber-700, .bg-sky-700, .bg-indigo-700, .bg-violet-700, .bg-teal-700, .bg-purple-700):is(button, a):hover:not(:disabled) {
+  filter: brightness(1.12);
 }
 
 .dark .text-slate-900,
@@ -180,4 +225,86 @@ button.bg-white:hover {
 .dark button.bg-slate-900:hover {
   box-shadow: 0 0 18px rgba(129, 140, 248, 0.5), 0 0 8px rgba(129, 140, 248, 0.3) !important;
   border-color: rgba(129, 140, 248, 0.5) !important;
+}
+
+/* ============================================================
+   MODO CLARO VIVO
+   Solo aplica cuando NO está activo el modo oscuro.
+   1) Los colores sólidos (botones, íconos, encabezados, etiquetas)
+      se pintan con un degradado brillante de su misma familia.
+   2) El fondo de la app lleva un toque de color en vez de gris plano.
+   ============================================================ */
+html:not(.dark) .bg-emerald-600, html:not(.dark) .bg-emerald-700 { background-image: linear-gradient(135deg, #10b981 0%, #059669 55%, #047857 100%); }
+html:not(.dark) .bg-rose-600,    html:not(.dark) .bg-rose-700    { background-image: linear-gradient(135deg, #fb7185 0%, #e11d48 55%, #be123c 100%); }
+html:not(.dark) .bg-amber-600,   html:not(.dark) .bg-amber-700   { background-image: linear-gradient(135deg, #fbbf24 0%, #f59e0b 45%, #d97706 100%); }
+html:not(.dark) .bg-sky-600,     html:not(.dark) .bg-sky-700     { background-image: linear-gradient(135deg, #38bdf8 0%, #0284c7 60%, #0369a1 100%); }
+html:not(.dark) .bg-indigo-600,  html:not(.dark) .bg-indigo-700  { background-image: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #7c3aed 100%); }
+html:not(.dark) .bg-violet-600,  html:not(.dark) .bg-violet-700  { background-image: linear-gradient(135deg, #a78bfa 0%, #7c3aed 55%, #6d28d9 100%); }
+html:not(.dark) .bg-purple-600,  html:not(.dark) .bg-purple-700  { background-image: linear-gradient(135deg, #c084fc 0%, #9333ea 55%, #7e22ce 100%); }
+html:not(.dark) .bg-teal-600,    html:not(.dark) .bg-teal-700    { background-image: linear-gradient(135deg, #2dd4bf 0%, #0d9488 55%, #0f766e 100%); }
+html:not(.dark) .bg-slate-700,   html:not(.dark) .bg-slate-800   { background-image: linear-gradient(135deg, #475569 0%, #334155 50%, #1e293b 100%); }
+
+/* Al pasar el mouse, los botones de color brillan un poco más */
+html:not(.dark) :is(.bg-emerald-600, .bg-emerald-700, .bg-rose-600, .bg-rose-700, .bg-amber-600, .bg-amber-700,
+  .bg-sky-600, .bg-sky-700, .bg-indigo-600, .bg-indigo-700, .bg-violet-600, .bg-violet-700, .bg-purple-600,
+  .bg-purple-700, .bg-teal-600, .bg-teal-700, .bg-slate-700, .bg-slate-800):is(button, a):hover:not(:disabled) {
+  filter: brightness(1.08) saturate(1.1);
+}
+
+/* Fondo de la app con color suave */
+html:not(.dark) .app-canvas {
+  background-color: #f5f7ff;
+  background-image:
+    radial-gradient(1100px 520px at 0% 0%, rgba(99, 102, 241, 0.13), transparent 60%),
+    radial-gradient(900px 480px at 100% 10%, rgba(16, 185, 129, 0.11), transparent 60%),
+    radial-gradient(900px 600px at 50% 100%, rgba(236, 72, 153, 0.08), transparent 60%);
+  background-attachment: fixed;
+}
+html:not(.dark) body {
+  background-color: #f5f7ff;
+}
+
+/* ============================================================
+   ENCABEZADOS DE COLOR SÓLIDO (.head-solid)
+   Dentro de una franja sólida, los textos grises pasan a blanco
+   (excepto los que están dentro de un botón/caja blanca) y los
+   cuadros de ícono se vuelven blanco translúcido.
+   ============================================================ */
+.head-solid :is(.text-slate-900, .text-slate-800):not(:is(.head-solid .bg-white\/95, .head-solid .bg-white\/95 *, input, select)) {
+  color: #ffffff;
+}
+.head-solid :is(.text-slate-700, .text-slate-600, .text-slate-500, .text-slate-400):not(:is(.head-solid .bg-white\/95, .head-solid .bg-white\/95 *, input, select)) {
+  color: rgba(255, 255, 255, 0.9);
+}
+.head-solid .head-icon {
+  background-color: rgba(255, 255, 255, 0.22) !important;
+  background-image: none !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+/* ============================================================
+   CAMPOS DE FORMULARIO SIEMPRE VISIBLES (solo dentro de la app)
+   Contorno de 2px y foco marcado en todos los módulos.
+   ============================================================ */
+main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea) {
+  border-width: 2px;
+  border-style: solid;
+  border-color: #94a3b8;
+  background-color: #ffffff;
+}
+main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea):hover {
+  border-color: #64748b;
+}
+main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea):focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.22);
+  outline: none;
+}
+.dark main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea) {
+  background-color: #1e293b;
+  border-color: #64748b;
+}
+.dark main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea):focus {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.25);
 }

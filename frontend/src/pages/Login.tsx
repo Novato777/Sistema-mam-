@@ -32,7 +32,7 @@ export default function Login() {
       }
 
       localStorage.setItem('token', data.access_token);
-      navigate('/dashboard');
+      navigate('/recepcion');
     } catch (err: any) {
       setError(err.message || 'Error de conexión con el servidor.');
     } finally {
@@ -69,18 +69,22 @@ export default function Login() {
       {/* Contenedor Glassmorphism de Login */}
       <div className="w-full max-w-md bg-slate-900/40 backdrop-blur-md rounded-3xl border border-slate-900 shadow-2xl p-8 space-y-6 animate-in fade-in zoom-in-95 duration-200">
         
-        {/* Encabezado con Logo */}
+        {/* Encabezado con Logo (Doble Clic secreto para abrir el Panel Master SaaS) */}
         <div className="text-center space-y-3">
-          <div className="relative inline-flex mb-1">
+          <div
+            className="relative inline-flex mb-1 cursor-pointer select-none"
+            onDoubleClick={() => navigate('/master')}
+            title="HOVENTRA"
+          >
             <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-2xl blur-xs opacity-75"></div>
             <img 
               src="/favicon.png" 
-              alt="Logo" 
-              className="relative w-14 h-14 object-contain rounded-2xl border border-slate-850 bg-slate-950 p-2.5 shadow-lg" 
+              alt="HOVENTRA" 
+              className="relative w-14 h-14 object-contain rounded-2xl border border-slate-850 bg-slate-950 p-2.5 shadow-lg active:scale-95 transition-transform" 
             />
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-white">
-            SystemPro
+          <h1 className="text-2xl font-black tracking-tight text-white select-none">
+            HOVENTRA
           </h1>
           <p className="text-xs text-slate-450 font-medium">
             Ingresa tus credenciales para acceder de forma segura

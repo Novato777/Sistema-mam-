@@ -100,10 +100,10 @@ export default function Landing() {
           <div className="flex items-center space-x-3">
             <div className="relative">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-lg blur-xs opacity-75"></div>
-              <img src="/favicon.png" alt="Logo" className="relative w-9 h-9 object-contain rounded-lg border border-slate-700/50 bg-slate-900 shadow-md" />
+              <img src="/favicon.png" alt="HOVENTRA" className="relative w-9 h-9 object-contain rounded-lg border border-slate-700/50 bg-slate-900 shadow-md" />
             </div>
             <span className="font-black text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-              SystemPro
+              HOVENTRA
             </span>
           </div>
           <Link 
@@ -122,18 +122,18 @@ export default function Landing() {
           <div className="lg:col-span-7 space-y-8">
             <div className="inline-flex items-center space-x-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-semibold uppercase tracking-widest">
               <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-              <span>Desarrollo de Software Exclusivo</span>
+              <span>Todo tu hotel. Una sola plataforma.</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-              Software de Gestión <br />
+              Sistema Integral de <br />
               <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent font-black">
-                Altamente Personalizado
+                Gestión Hotelera (PMS)
               </span>
             </h1>
 
             <p className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl font-medium">
-              Esta plataforma representa un **software desarrollado a medida**, adaptado con precisión milimétrica según los flujos de trabajo, necesidades y requerimientos específicos del cliente. Sin licenciamientos innecesarios, ligero y optimizado para potenciar los negocios familiares en tiempo real.
+              Un solo sistema con **todas las funcionalidades** para operar tu hotel de principio a fin: Recepción, Reservas, Habitaciones, Folios, Caja por Turno, Housekeeping, Restaurante/POS, Inventario, Mantenimiento y Contabilidad en una plataforma Multi-Tenant segura.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
@@ -145,7 +145,7 @@ export default function Landing() {
               </Link>
               <div className="inline-flex items-center justify-center space-x-2.5 px-5 py-3 border border-slate-800 bg-slate-900/50 rounded-2xl text-slate-400 text-sm font-semibold select-none">
                 <ShieldCheck className="w-4.5 h-4.5 text-emerald-400" />
-                <span>Acceso Seguro y Encriptado</span>
+                <span>Aislamiento Multi-Tenant y Encriptación</span>
               </div>
             </div>
           </div>
@@ -157,7 +157,7 @@ export default function Landing() {
         {/* Sección de Cards al Fondo (Abajo de la Hero con espaciado equilibrado) */}
         <section className="max-w-7xl mx-auto w-full px-6 mt-8 mb-24 relative z-10">
           <h2 className="text-xs font-bold uppercase tracking-[0.25em] text-slate-500 mb-8 text-center lg:text-left">
-            Módulos Integrados del Sistema
+            Módulos Integrados del PMS Hotelero
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             
@@ -165,9 +165,9 @@ export default function Landing() {
               <div className="p-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl w-fit">
                 <Building2 className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-white text-lg group-hover:text-indigo-400 transition-colors">Módulo Hotelero</h3>
+              <h3 className="font-bold text-white text-lg group-hover:text-indigo-400 transition-colors">Recepción, Reservas y Folios</h3>
               <p className="text-slate-400 text-xs leading-relaxed font-medium">
-                Control de habitaciones, asignación de huéspedes, cronograma de próximos pagos y alertas de morosidad en tiempo real.
+                Control de habitaciones, reservas, check-in/out, acompañantes, folios de estancia y alertas de saldos en tiempo real.
               </p>
             </div>
 
@@ -175,9 +175,9 @@ export default function Landing() {
               <div className="p-3 bg-rose-500/10 text-rose-45 border border-rose-500/20 rounded-2xl w-fit">
                 <UtensilsCrossed className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-white text-lg group-hover:text-rose-400 transition-colors">Gastronomía</h3>
+              <h3 className="font-bold text-white text-lg group-hover:text-rose-400 transition-colors">Restaurante y Servicios POS</h3>
               <p className="text-slate-400 text-xs leading-relaxed font-medium">
-                Ventas rápidas de restaurante, control de métodos de pago (Efectivo/Transferencia) y reporte diario de caja.
+                Comedor, Room Service, Minibar y Lavandería con pago directo en caja o cargo automático al folio de la habitación.
               </p>
             </div>
 
@@ -185,9 +185,9 @@ export default function Landing() {
               <div className="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl w-fit">
                 <Leaf className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-white text-lg group-hover:text-amber-400 transition-colors">Lichiguería</h3>
+              <h3 className="font-bold text-white text-lg group-hover:text-amber-400 transition-colors">Housekeeping e Inventario</h3>
               <p className="text-slate-400 text-xs leading-relaxed font-medium">
-                Gestión de proveedores locales, registro por pesaje e inventario simplificado para máxima agilidad comercial.
+                Control de limpieza de habitaciones, mantenimiento preventivo/correctivo, Kardex de insumos, amenidades y compras.
               </p>
             </div>
 
@@ -195,9 +195,9 @@ export default function Landing() {
               <div className="p-3 bg-emerald-500/10 text-emerald-455 border border-emerald-500/20 rounded-2xl w-fit">
                 <FileText className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-white text-lg group-hover:text-emerald-400 transition-colors">Reportes PDF</h3>
+              <h3 className="font-bold text-white text-lg group-hover:text-emerald-400 transition-colors">Caja, Contabilidad y Reportes</h3>
               <p className="text-slate-400 text-xs leading-relaxed font-medium">
-                Generación de informes de venta e historiales financieros en formato PDF de alta velocidad, listos para descargar.
+                Control de caja por turno, contabilidad de partida doble, estados financieros y exportación en PDF y Excel.
               </p>
             </div>
 
