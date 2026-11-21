@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node src/app.js",
     "dev": "node src/app.js",
     "reset-db": "node scripts/resetNeonDb.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,5 +23,8 @@
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.22.0",
     "sqlite3": "^6.0.1"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
