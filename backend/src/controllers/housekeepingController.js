@@ -1,3 +1,4 @@
+const { isHotelMember, hasAssignee } = require('../utils/hotelMembers');
 const db = require('../config/db');
 const { getTodayString } = require('../utils/date');
 
@@ -174,12 +175,11 @@ exports.getHousekeepingOverview = async (req, res) => {
 
     // 4. Personal operativo del hotel para asignación de tareas y balance de carga
     const staffRows = await db.query(
-      `SELECT DISTINCT u.id, u.username, u.full_name,
+      `SELECT u.id, u.username, u.full_name,
               COALESCE(uh.role, u.role) as effective_role
        FROM users u
-       LEFT JOIN user_hotels uh ON uh.user_id = u.id AND uh.hotel_id = ?
-       WHERE COALESCE(u.active, 1) = 1
-         AND (uh.hotel_id = ? OR u.role IN ('PROPIETARIO', 'ADMIN', 'ADMINISTRADOR', 'LIMPIEZA'))
+       JOIN user_hotels uh ON uh.user_id = u.id AND uh.hotel_id = ? AND uh.active = 1
+       WHERE COALESCE(u.active, 1) = 1 AND uh.hotel_id = ?
        ORDER BY
          CASE COALESCE(uh.role, u.role)
            WHEN 'LIMPIEZA' THEN 1
@@ -327,6 +327,10 @@ exports.createHousekeepingTask = async (req, res) => {
       mark_room_pending = true
     } = req.body || {};
 
+    if (hasAssignee(assigned_to) && !(await isHotelMember(hotelId, assigned_to))) {
+      return res.status(400).json({ error: 'La persona asignada no pertenece a este establecimiento.' });
+    }
+
     if (!room_id) {
       return res.status(400).json({ error: 'Debe seleccionar una habitación para la tarea.' });
     }
@@ -467,9 +471,9 @@ exports.generateDailyCleaningTasks = async (req, res) => {
     const roomsWithTask = new Set(activeTasks.map((t) => Number(t.room_id)));
 
     const cleaningStaff = await db.query(
-      `SELECT DISTINCT u.id
+      `SELECT u.id
        FROM users u
-       LEFT JOIN user_hotels uh ON uh.user_id = u.id AND uh.hotel_id = ?
+       JOIN user_hotels uh ON uh.user_id = u.id AND uh.hotel_id = ? AND uh.active = 1
        WHERE COALESCE(u.active, 1) = 1
          AND COALESCE(uh.role, u.role) = 'LIMPIEZA'
        ORDER BY u.id ASC`,
@@ -558,6 +562,10 @@ exports.assignHousekeepingTask = async (req, res) => {
     const hotelId = req.hotelId;
     const taskId = Number(req.params.taskId || req.params.id);
     const { assigned_to, priority, notes, task_type } = req.body || {};
+
+    if (hasAssignee(assigned_to) && !(await isHotelMember(hotelId, assigned_to))) {
+      return res.status(400).json({ error: 'La persona asignada no pertenece a este establecimiento.' });
+    }
 
     const task = await db.get(
       `SELECT ht.*, r.number as room_number

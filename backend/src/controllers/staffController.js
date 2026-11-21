@@ -1,6 +1,15 @@
 const db = require('../config/db');
 const { getTodayString, formatDate } = require('../utils/date');
 
+/** Busca un empleado SOLO si pertenece a este hotel (evita tocar personal de otros hoteles). */
+const findHotelStaff = (hotelId, userId, cols = 'id, full_name') =>
+  db.get(
+    `SELECT ${cols} FROM users u
+     WHERE u.id = ?
+       AND (u.default_hotel_id = ? OR EXISTS (SELECT 1 FROM user_hotels uh WHERE uh.user_id = u.id AND uh.hotel_id = ?))`,
+    [userId, hotelId, hotelId]
+  );
+
 // 1. Overview de Personal (Fichas de Empleados, Turnos y Métricas de Rendimiento Operativo)
 exports.getStaffOverview = async (req, res) => {
   try {
@@ -155,7 +164,7 @@ exports.saveEmployeeProfile = async (req, res) => {
       phone
     } = req.body;
 
-    const user = await db.get('SELECT id, full_name FROM users WHERE id = ?', [userId]);
+    const user = await findHotelStaff(hotelId, userId);
     if (!user) {
       return res.status(404).json({ error: 'Empleado no encontrado.' });
     }
@@ -249,7 +258,7 @@ exports.createShift = async (req, res) => {
       return res.status(400).json({ error: 'Empleado y fecha del turno son obligatorios.' });
     }
 
-    const user = await db.get('SELECT id, full_name FROM users WHERE id = ?', [Number(user_id)]);
+    const user = await findHotelStaff(hotelId, Number(user_id));
     if (!user) {
       return res.status(404).json({ error: 'Empleado no encontrado.' });
     }
@@ -320,10 +329,7 @@ exports.getEmployeeActivityHistory = async (req, res) => {
     const hotelId = req.hotelId;
     const userId = Number(req.params.userId);
 
-    const user = await db.get(
-      'SELECT id, username, full_name, role, position FROM users WHERE id = ?',
-      [userId]
-    );
+    const user = await findHotelStaff(hotelId, userId, 'id, username, full_name, role, position');
     if (!user) {
       return res.status(404).json({ error: 'Empleado no encontrado.' });
     }

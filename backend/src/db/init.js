@@ -4,6 +4,11 @@ const { getTodayString } = require('../utils/date');
 const isPg = dbType === 'pg';
 const pkType = isPg ? 'SERIAL PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
 const numType = isPg ? 'DECIMAL(12,2)' : 'REAL';
+// Fecha del día (YYYY-MM-DD, hora de Colombia) calculada por la base en cada INSERT.
+// Antes se usaba DEFAULT '<fecha de creación de la tabla>', que dejaba la fecha congelada.
+const nowDateDefault = isPg
+  ? "(to_char(now() AT TIME ZONE 'America/Bogota', 'YYYY-MM-DD'))"
+  : "(date('now', '-5 hours'))";
 
 // Helper idempotente para agregar columnas a tablas existentes sin destruir datos
 const ensureColumn = async (table, column, definition) => {
@@ -18,57 +23,8 @@ const ensureColumn = async (table, column, definition) => {
       }
     }
   } catch (err) {
-    // Ignorar si ya existe
-    // 12. Plantillas de Mensajería para Huéspedes por defecto (Bloque 14)
-    const tplCount = await get('SELECT COUNT(*) as c FROM message_templates WHERE hotel_id = ?', [hotelId]);
-    if (!tplCount || Number(tplCount.c) === 0) {
-      const nowIso = new Date().toISOString();
-      const defaultTemplates = [
-        [
-          'CONFIRMACION_RESERVA',
-          'WHATSAPP',
-          'Confirmación de Reserva',
-          '¡Hola {{guest_name}}! Confirmamos tu reserva {{reservation_code}} en {{hotel_name}} para el check-in el {{check_in_date}} en la habitación {{room_number}}. Saldo pendiente: ${{balance}} COP. ¡Te esperamos!',
-          JSON.stringify(['guest_name', 'reservation_code', 'hotel_name', 'check_in_date', 'room_number', 'balance'])
-        ],
-        [
-          'CONFIRMACION_RESERVA',
-          'EMAIL',
-          'Confirmación de Reserva en {{hotel_name}}',
-          'Estimado(a) {{guest_name}},\n\nNos complace confirmar su reserva #{{reservation_code}} en {{hotel_name}}.\n\nDetalles:\n- Check-in: {{check_in_date}} (a partir de las {{check_in_time}})\n- Check-out: {{check_out_date}}\n- Habitación: {{room_number}}\n- Total reserva: ${{total}} COP\n- Saldo pendiente: ${{balance}} COP\n\nDirección: {{hotel_address}}\nTeléfono: {{hotel_phone}}\n\n¡Gracias por elegirnos!',
-          JSON.stringify(['guest_name', 'reservation_code', 'hotel_name', 'check_in_date', 'check_in_time', 'check_out_date', 'room_number', 'total', 'balance', 'hotel_address', 'hotel_phone'])
-        ],
-        [
-          'RECORDATORIO_CHECKIN',
-          'WHATSAPP',
-          'Recordatorio de Check-in Hoy',
-          '¡Buen día {{guest_name}}! Te recordamos que hoy es tu fecha de llegada a {{hotel_name}}. Tu habitación {{room_number}} estará lista a partir de las {{check_in_time}}. Contáctanos si tienes algún requerimiento especial al {{hotel_phone}}.',
-          JSON.stringify(['guest_name', 'hotel_name', 'room_number', 'check_in_time', 'hotel_phone'])
-        ],
-        [
-          'AVISO_CHECKOUT',
-          'WHATSAPP',
-          'Aviso de Check-out',
-          'Estimado(a) {{guest_name}}, te recordamos que el horario de check-out en {{hotel_name}} es hasta las {{check_out_time}}. Tu saldo pendiente en recepción es ${{balance}} COP. Agradecemos tu visita.',
-          JSON.stringify(['guest_name', 'hotel_name', 'check_out_time', 'balance'])
-        ],
-        [
-          'BIENVENIDA_HUESPED',
-          'WHATSAPP',
-          'Bienvenida al Hotel',
-          '¡Bienvenido(a) a {{hotel_name}}, {{guest_name}}! Deseamos que disfrutes tu estancia en la habitación {{room_number}}. Si requieres room service o restaurante, puedes comunicarte con recepción marcando a recepción.',
-          JSON.stringify(['hotel_name', 'guest_name', 'room_number'])
-        ]
-      ];
-
-      for (const [code, channel, title, body, vars] of defaultTemplates) {
-        await run(
-          `INSERT INTO message_templates (hotel_id, code, channel, title, body_template, variables_json, active, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
-          [hotelId, code, channel, title, body, vars, nowIso]
-        );
-      }
-    }
+    // No detener el arranque por una columna, pero dejar constancia del motivo.
+    console.warn(`[db] No se pudo asegurar la columna ${table}.${column}: ${err.message}`);
   }
 };
 
@@ -465,9 +421,9 @@ const initDatabase = async () => {
         role TEXT DEFAULT 'PROPIETARIO',
         custom_permissions TEXT,
         active INTEGER DEFAULT 1,
-        default_hotel_id INTEGER DEFAULT 1,
+        default_hotel_id INTEGER,
         last_login_at TEXT,
-        created_at TEXT DEFAULT '${today}'
+        created_at TEXT DEFAULT ${nowDateDefault}
       )
     `);
     await ensureColumn('users', 'full_name', "TEXT DEFAULT 'Administrador Principal'");
@@ -478,9 +434,9 @@ const initDatabase = async () => {
     await ensureColumn('users', 'role', "TEXT DEFAULT 'PROPIETARIO'");
     await ensureColumn('users', 'custom_permissions', 'TEXT');
     await ensureColumn('users', 'active', 'INTEGER DEFAULT 1');
-    await ensureColumn('users', 'default_hotel_id', 'INTEGER DEFAULT 1');
+    await ensureColumn('users', 'default_hotel_id', 'INTEGER');
     await ensureColumn('users', 'last_login_at', 'TEXT');
-    await ensureColumn('users', 'created_at', `TEXT DEFAULT '${today}'`);
+    await ensureColumn('users', 'created_at', 'TEXT');
 
     // 2. Tabla de Hoteles (Tenants / Sedes)
     await run(`
@@ -508,7 +464,7 @@ const initDatabase = async () => {
         sire_code TEXT,
         tra_code TEXT,
         active INTEGER DEFAULT 1,
-        created_at TEXT DEFAULT '${today}'
+        created_at TEXT DEFAULT ${nowDateDefault}
       )
     `);
     await ensureColumn('hotels', 'code', 'TEXT');
@@ -544,7 +500,7 @@ const initDatabase = async () => {
     await ensureColumn('hotels', 'smtp_from_email', 'TEXT');
     await ensureColumn('hotels', 'smtp_secure', 'INTEGER DEFAULT 0');
     await ensureColumn('hotels', 'active', 'INTEGER DEFAULT 1');
-    await ensureColumn('hotels', 'created_at', `TEXT DEFAULT '${today}'`);
+    await ensureColumn('hotels', 'created_at', 'TEXT');
 
     // 3. Relación Usuarios <-> Hoteles (Permisos por Sede / Tenant)
     await run(`
@@ -565,7 +521,7 @@ const initDatabase = async () => {
       CREATE TABLE IF NOT EXISTS user_sessions (
         id ${pkType},
         user_id INTEGER NOT NULL,
-        hotel_id INTEGER DEFAULT 1,
+        hotel_id INTEGER,
         session_token TEXT UNIQUE NOT NULL,
         ip_address TEXT,
         user_agent TEXT,
@@ -714,7 +670,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS guests (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         first_name TEXT NOT NULL,
         last_name TEXT DEFAULT '',
         doc_type TEXT DEFAULT 'CC',
@@ -727,7 +683,7 @@ const initDatabase = async () => {
         address TEXT,
         birth_date TEXT,
         observations TEXT,
-        created_at TEXT DEFAULT '${today}',
+        created_at TEXT DEFAULT ${nowDateDefault},
         FOREIGN KEY (hotel_id) REFERENCES hotels (id) ON DELETE CASCADE
       )
     `);
@@ -741,7 +697,7 @@ const initDatabase = async () => {
     await ensureColumn('guests', 'emergency_contact', 'TEXT');
     await ensureColumn('guests', 'documents_json', "TEXT DEFAULT '[]'");
     await ensureColumn('guests', 'vip_status', 'INTEGER DEFAULT 0');
-    await ensureColumn('guests', 'created_at', `TEXT DEFAULT '${today}'`);
+    await ensureColumn('guests', 'created_at', 'TEXT');
 
     // 10. Reservas
     await run(`
@@ -798,7 +754,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS reservation_rooms (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         reservation_id INTEGER NOT NULL,
         room_id INTEGER NOT NULL,
         room_type_id INTEGER,
@@ -816,7 +772,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS stays (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         reservation_id INTEGER,
         room_id INTEGER NOT NULL,
         guest_id INTEGER NOT NULL,
@@ -851,7 +807,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS stay_companions (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         stay_id INTEGER NOT NULL,
         full_name TEXT NOT NULL,
         doc_type TEXT DEFAULT 'CC',
@@ -861,7 +817,7 @@ const initDatabase = async () => {
         relationship TEXT DEFAULT 'Acompañante',
         is_minor INTEGER DEFAULT 0,
         parental_auth_notes TEXT,
-        created_at TEXT DEFAULT '${today}',
+        created_at TEXT DEFAULT ${nowDateDefault},
         FOREIGN KEY (hotel_id) REFERENCES hotels (id) ON DELETE CASCADE,
         FOREIGN KEY (stay_id) REFERENCES stays (id) ON DELETE CASCADE
       )
@@ -871,7 +827,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS housekeeping_tasks (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         room_id INTEGER NOT NULL,
         stay_id INTEGER,
         task_type TEXT DEFAULT 'ASEO_SALIDA',
@@ -891,7 +847,7 @@ const initDatabase = async () => {
         notes TEXT,
         started_at TEXT,
         completed_at TEXT,
-        created_at TEXT DEFAULT '${today}',
+        created_at TEXT DEFAULT ${nowDateDefault},
         FOREIGN KEY (hotel_id) REFERENCES hotels (id) ON DELETE CASCADE,
         FOREIGN KEY (room_id) REFERENCES rooms (id) ON DELETE CASCADE,
         FOREIGN KEY (stay_id) REFERENCES stays (id) ON DELETE SET NULL,
@@ -913,7 +869,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS maintenance_tickets (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         room_id INTEGER NOT NULL,
         housekeeping_task_id INTEGER,
         reported_by INTEGER,
@@ -952,7 +908,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS guest_accounts (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         stay_id INTEGER NOT NULL UNIQUE,
         total_charges ${numType} DEFAULT 0,
         total_paid ${numType} DEFAULT 0,
@@ -969,7 +925,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS account_charges (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         account_id INTEGER NOT NULL,
         type TEXT NOT NULL,
         description TEXT NOT NULL,
@@ -988,7 +944,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS payments (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         account_id INTEGER NOT NULL,
         method TEXT NOT NULL,
         amount ${numType} NOT NULL,
@@ -1033,7 +989,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS cash_movements (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         register_id INTEGER NOT NULL,
         type TEXT NOT NULL,
         amount ${numType} NOT NULL,
@@ -1079,7 +1035,7 @@ const initDatabase = async () => {
     await run(`
       CREATE TABLE IF NOT EXISTS cash_audits (
         id ${pkType},
-        hotel_id INTEGER NOT NULL DEFAULT 1,
+        hotel_id INTEGER NOT NULL,
         register_id INTEGER NOT NULL,
         user_id INTEGER NOT NULL,
         audit_type TEXT DEFAULT 'ARQUEO_PARCIAL',
@@ -1143,7 +1099,7 @@ const initDatabase = async () => {
         payment_terms TEXT DEFAULT 'Contado',
         notes TEXT,
         active INTEGER DEFAULT 1,
-        created_at TEXT DEFAULT '${today}',
+        created_at TEXT DEFAULT ${nowDateDefault},
         FOREIGN KEY (hotel_id) REFERENCES hotels (id) ON DELETE CASCADE
       )
     `);
@@ -1242,7 +1198,7 @@ const initDatabase = async () => {
         prep_time_minutes INTEGER DEFAULT 10,
         inventory_product_id INTEGER,
         active INTEGER DEFAULT 1,
-        created_at TEXT DEFAULT '${today}',
+        created_at TEXT DEFAULT ${nowDateDefault},
         FOREIGN KEY (hotel_id) REFERENCES hotels (id) ON DELETE CASCADE
       )
     `);
@@ -1266,7 +1222,7 @@ const initDatabase = async () => {
         quantity ${numType} NOT NULL DEFAULT 1,
         unit TEXT DEFAULT 'UND',
         notes TEXT,
-        created_at TEXT DEFAULT '${today}',
+        created_at TEXT DEFAULT ${nowDateDefault},
         UNIQUE(catalog_id, inventory_product_id),
         FOREIGN KEY (hotel_id) REFERENCES hotels (id) ON DELETE CASCADE,
         FOREIGN KEY (catalog_id) REFERENCES service_catalog (id) ON DELETE CASCADE,
@@ -1682,60 +1638,14 @@ const initDatabase = async () => {
     const migrateLegacyData = require('./migrateLegacy');
     await migrateLegacyData(ensureHotelDefaults);
 
+    // Migraciones versionadas: limpieza de datos, blindaje multi-tenant e índices
+    const { runMigrations } = require('./migrations');
+    await runMigrations();
+
     console.log('Tablas y configuración Multi-Tenant inicializadas correctamente.');
   } catch (error) {
     console.error('Error al inicializar la base de datos:', error);
     process.exit(1);
-    // 12. Plantillas de Mensajería para Huéspedes por defecto (Bloque 14)
-    const tplCount = await get('SELECT COUNT(*) as c FROM message_templates WHERE hotel_id = ?', [hotelId]);
-    if (!tplCount || Number(tplCount.c) === 0) {
-      const nowIso = new Date().toISOString();
-      const defaultTemplates = [
-        [
-          'CONFIRMACION_RESERVA',
-          'WHATSAPP',
-          'Confirmación de Reserva',
-          '¡Hola {{guest_name}}! Confirmamos tu reserva {{reservation_code}} en {{hotel_name}} para el check-in el {{check_in_date}} en la habitación {{room_number}}. Saldo pendiente: ${{balance}} COP. ¡Te esperamos!',
-          JSON.stringify(['guest_name', 'reservation_code', 'hotel_name', 'check_in_date', 'room_number', 'balance'])
-        ],
-        [
-          'CONFIRMACION_RESERVA',
-          'EMAIL',
-          'Confirmación de Reserva en {{hotel_name}}',
-          'Estimado(a) {{guest_name}},\n\nNos complace confirmar su reserva #{{reservation_code}} en {{hotel_name}}.\n\nDetalles:\n- Check-in: {{check_in_date}} (a partir de las {{check_in_time}})\n- Check-out: {{check_out_date}}\n- Habitación: {{room_number}}\n- Total reserva: ${{total}} COP\n- Saldo pendiente: ${{balance}} COP\n\nDirección: {{hotel_address}}\nTeléfono: {{hotel_phone}}\n\n¡Gracias por elegirnos!',
-          JSON.stringify(['guest_name', 'reservation_code', 'hotel_name', 'check_in_date', 'check_in_time', 'check_out_date', 'room_number', 'total', 'balance', 'hotel_address', 'hotel_phone'])
-        ],
-        [
-          'RECORDATORIO_CHECKIN',
-          'WHATSAPP',
-          'Recordatorio de Check-in Hoy',
-          '¡Buen día {{guest_name}}! Te recordamos que hoy es tu fecha de llegada a {{hotel_name}}. Tu habitación {{room_number}} estará lista a partir de las {{check_in_time}}. Contáctanos si tienes algún requerimiento especial al {{hotel_phone}}.',
-          JSON.stringify(['guest_name', 'hotel_name', 'room_number', 'check_in_time', 'hotel_phone'])
-        ],
-        [
-          'AVISO_CHECKOUT',
-          'WHATSAPP',
-          'Aviso de Check-out',
-          'Estimado(a) {{guest_name}}, te recordamos que el horario de check-out en {{hotel_name}} es hasta las {{check_out_time}}. Tu saldo pendiente en recepción es ${{balance}} COP. Agradecemos tu visita.',
-          JSON.stringify(['guest_name', 'hotel_name', 'check_out_time', 'balance'])
-        ],
-        [
-          'BIENVENIDA_HUESPED',
-          'WHATSAPP',
-          'Bienvenida al Hotel',
-          '¡Bienvenido(a) a {{hotel_name}}, {{guest_name}}! Deseamos que disfrutes tu estancia en la habitación {{room_number}}. Si requieres room service o restaurante, puedes comunicarte con recepción marcando a recepción.',
-          JSON.stringify(['hotel_name', 'guest_name', 'room_number'])
-        ]
-      ];
-
-      for (const [code, channel, title, body, vars] of defaultTemplates) {
-        await run(
-          `INSERT INTO message_templates (hotel_id, code, channel, title, body_template, variables_json, active, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
-          [hotelId, code, channel, title, body, vars, nowIso]
-        );
-      }
-    }
   }
 };
 

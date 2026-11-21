@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { publicHotel, publicHotels } = require('../utils/publicHotel');
 const { getTodayString } = require('../utils/date');
 const { ensureHotelDefaults } = require('../db/init');
 
@@ -58,7 +59,7 @@ exports.listHotels = async (req, res) => {
       const free = Math.max(0, total - occupied - reserved - cleaning - maintenance);
 
       enriched.push({
-        ...h,
+        ...publicHotel(h),
         stats: {
           total_rooms: total,
           occupied_rooms: occupied,
@@ -163,7 +164,7 @@ exports.createHotel = async (req, res) => {
 
     res.status(201).json({
       message: 'Establecimiento hotelero creado e inicializado con éxito.',
-      hotel: newHotel
+      hotel: publicHotel(newHotel)
     });
   } catch (error) {
     console.error('Error al crear hotel:', error);
@@ -191,7 +192,7 @@ exports.getHotelConfig = async (req, res) => {
     );
 
     res.json({
-      hotel,
+      hotel: publicHotel(hotel),
       taxes,
       paymentMethods,
       departments,
@@ -289,7 +290,7 @@ exports.updateHotelConfig = async (req, res) => {
     );
 
     const updated = await db.get('SELECT * FROM hotels WHERE id = ?', [hotelId]);
-    res.json({ message: 'Configuración del hotel actualizada correctamente.', hotel: updated });
+    res.json({ message: 'Configuración del hotel actualizada correctamente.', hotel: publicHotel(updated) });
   } catch (error) {
     console.error('Error al actualizar hotel:', error);
     res.status(500).json({ error: 'Error al guardar la configuración del hotel.' });

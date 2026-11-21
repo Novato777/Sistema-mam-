@@ -411,7 +411,7 @@ export default function Mantenimiento() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-slate-800">
+      <div className="flex flex-wrap gap-2 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-slate-800">
         <button
           onClick={() => setActiveTab('ORDENES')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold ${
@@ -456,7 +456,7 @@ export default function Mantenimiento() {
             </select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="list-scroll grid grid-cols-1 md:grid-cols-2 gap-4">
             {tickets.map((t) => (
               <div
                 key={t.id}

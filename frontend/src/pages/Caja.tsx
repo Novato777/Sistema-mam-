@@ -707,7 +707,7 @@ export default function Caja() {
       {activeTab === 'HOY' && (
         <>
           {loading ? (
-            <div className={`p-10 text-center text-sm font-semibold text-slate-500 ${SECTION('slate')}`}>
+            <div className={`p-10 text-center text-sm font-semibold text-slate-500 ${SECTION('emerald')}`}>
               Cargando caja…
             </div>
           ) : !register ? (
@@ -1063,7 +1063,7 @@ export default function Caja() {
       ===================================================================== */}
       {activeTab === 'HISTORIAL' && (
         <div className="space-y-4 sm:space-y-5">
-          <section className={`p-4 sm:p-5 space-y-3 ${SECTION('slate')}`}>
+          <section className={`p-4 sm:p-5 space-y-3 ${SECTION('indigo')}`}>
             <Segmented<Period>
               value={period}
               onChange={changePeriod}
@@ -1280,7 +1280,7 @@ export default function Caja() {
                 {reportData.report_by_user.length === 0 ? (
                   <EmptyText>Sin movimientos en este periodo.</EmptyText>
                 ) : (
-                  <ul className="space-y-2.5">
+                  <ul className="list-scroll space-y-2.5">
                     {reportData.report_by_user.map((u: any) => (
                       <SummaryRow
                         key={u.user_id}
@@ -1302,7 +1302,7 @@ export default function Caja() {
                 {recentAudits.length === 0 ? (
                   <EmptyText>No hay conteos registrados.</EmptyText>
                 ) : (
-                  <ul className="space-y-2.5">
+                  <ul className="list-scroll space-y-2.5">
                     {recentAudits.map((a) => (
                       <SummaryRow
                         key={a.id}

@@ -7,6 +7,46 @@ const {
   resolveEffectivePermissions
 } = require('../config/permissions');
 
+/* -------------------------------------------------------------------------
+   AISLAMIENTO POR HOTEL
+   Cada usuario solo puede ver y administrar personas de los hoteles a los que
+   él mismo pertenece. Antes estas rutas eran globales: el administrador de un
+   hotel cliente podía ver, editar (incluida la contraseña) o desactivar a los
+   usuarios de cualquier otro hotel.
+------------------------------------------------------------------------- */
+const isOwnerRole = (role) => role === 'PROPIETARIO' || role === 'ADMIN';
+
+/** Hoteles activos a los que pertenece quien hace la petición. */
+const myHotelIds = async (req) => {
+  if (req._myHotelIds) return req._myHotelIds;
+  const rows = await db.query(
+    `SELECT uh.hotel_id FROM user_hotels uh
+     JOIN hotels h ON h.id = uh.hotel_id
+     WHERE uh.user_id = ? AND uh.active = 1`,
+    [req.user.id]
+  );
+  req._myHotelIds = rows.map((r) => Number(r.hotel_id));
+  return req._myHotelIds;
+};
+
+const inList = (ids) => (ids.length ? ids.map(() => '?').join(',') : 'NULL');
+
+/** ¿El usuario objetivo pertenece a alguno de mis hoteles? */
+const canManageTarget = async (req, target) => {
+  if (Number(target.id) === Number(req.user.id)) return true;
+  const mine = await myHotelIds(req);
+  if (!mine.length) return false;
+  if (mine.includes(Number(target.default_hotel_id))) return true;
+  const link = await db.get(
+    `SELECT COUNT(*) as c FROM user_hotels WHERE user_id = ? AND hotel_id IN (${inList(mine)})`,
+    [target.id, ...mine]
+  );
+  return Number(link?.c || 0) > 0;
+};
+
+/** Solo un propietario puede crear o editar propietarios. */
+const roleAllowed = (req, role) => isOwnerRole(req.user.role) || !isOwnerRole(role);
+
 exports.getRolesAndPermissions = async (req, res) => {
   res.json({
     roles: ROLES_DEFINITION,
@@ -16,19 +56,25 @@ exports.getRolesAndPermissions = async (req, res) => {
 
 exports.listUsers = async (req, res) => {
   try {
+    const mine = await myHotelIds(req);
+    if (!mine.length) return res.json([]);
     const users = await db.query(
       `SELECT id, username, full_name, document, position, email, phone,
               role, custom_permissions, active, default_hotel_id, last_login_at, created_at
        FROM users
-       ORDER BY id ASC`
+       WHERE id IN (SELECT user_id FROM user_hotels WHERE hotel_id IN (${inList(mine)}))
+          OR default_hotel_id IN (${inList(mine)})
+       ORDER BY id ASC`,
+      [...mine, ...mine]
     );
 
     const assignments = await db.query(
       `SELECT uh.user_id, uh.hotel_id, uh.role, uh.active, h.name as hotel_name
        FROM user_hotels uh
        JOIN hotels h ON uh.hotel_id = h.id
-       WHERE h.active = 1
-       ORDER BY uh.hotel_id ASC`
+       WHERE h.active = 1 AND uh.hotel_id IN (${inList(mine)})
+       ORDER BY uh.hotel_id ASC`,
+      mine
     );
 
     const enriched = users.map((u) => {
@@ -93,15 +139,25 @@ exports.createUser = async (req, res) => {
     }
 
     const validRole = ROLES_DEFINITION[role] ? role : 'RECEPCIONISTA';
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const today = getTodayString();
+    if (!roleAllowed(req, validRole)) {
+      return res.status(403).json({ error: 'Solo un propietario puede crear otro usuario propietario.' });
+    }
 
-    const assignedHotels =
+    const mine = await myHotelIds(req);
+    const requestedHotels =
       Array.isArray(hotel_ids) && hotel_ids.length > 0
         ? hotel_ids.map((id) => Number(id))
-        : [Number(default_hotel_id || req.hotelId || 1)];
+        : [Number(default_hotel_id || req.headers['x-hotel-id'] || mine[0])];
+    const assignedHotels = [...new Set(requestedHotels.filter((id) => Number.isInteger(id) && id > 0))];
+    if (!assignedHotels.length || assignedHotels.some((id) => !mine.includes(id))) {
+      return res.status(403).json({ error: 'Solo puedes asignar usuarios a los hoteles donde tú trabajas.' });
+    }
 
-    const primaryHotelId = Number(default_hotel_id) || assignedHotels[0] || 1;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const today = getTodayString();
+    const primaryHotelId = assignedHotels.includes(Number(default_hotel_id))
+      ? Number(default_hotel_id)
+      : assignedHotels[0];
     const customPermsStr = custom_permissions ? JSON.stringify(custom_permissions) : null;
 
     const createdUserId = await db.withTransaction(async (tx) => {
@@ -182,11 +238,23 @@ exports.updateUser = async (req, res) => {
     } = req.body;
 
     const existing = await db.get('SELECT * FROM users WHERE id = ?', [targetId]);
-    if (!existing) {
+    if (!existing || !(await canManageTarget(req, existing))) {
       return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
 
     const validRole = role && ROLES_DEFINITION[role] ? role : existing.role;
+    // Nadie puede subirse ni subir a otro a propietario si no lo es; tampoco
+    // tocar la cuenta de un propietario (contraseña, rol) sin serlo.
+    if (!roleAllowed(req, validRole) || (!isOwnerRole(req.user.role) && isOwnerRole(existing.role))) {
+      return res.status(403).json({ error: 'Solo un propietario puede modificar cuentas de propietario.' });
+    }
+    const mine = await myHotelIds(req);
+    const newHotels = Array.isArray(hotel_ids)
+      ? [...new Set(hotel_ids.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))]
+      : [];
+    if (newHotels.some((id) => !mine.includes(id)) || (default_hotel_id && !mine.includes(Number(default_hotel_id)))) {
+      return res.status(403).json({ error: 'Solo puedes asignar usuarios a los hoteles donde tú trabajas.' });
+    }
     const customPermsStr =
       custom_permissions !== undefined
         ? JSON.stringify(custom_permissions)
@@ -222,16 +290,23 @@ exports.updateUser = async (req, res) => {
         ]
       );
 
-      if (Array.isArray(hotel_ids) && hotel_ids.length > 0) {
-        await tx.run('DELETE FROM user_hotels WHERE user_id = ?', [targetId]);
-        for (const hId of hotel_ids) {
+      if (newHotels.length > 0) {
+        // Solo se reemplazan los accesos a MIS hoteles; los de otros hoteles se conservan.
+        await tx.run(
+          `DELETE FROM user_hotels WHERE user_id = ? AND hotel_id IN (${inList(mine)})`,
+          [targetId, ...mine]
+        );
+        for (const hId of newHotels) {
           await tx.run(
             'INSERT INTO user_hotels (user_id, hotel_id, role, active) VALUES (?, ?, ?, 1)',
-            [targetId, Number(hId), validRole]
+            [targetId, hId, validRole]
           );
         }
       } else {
-        await tx.run('UPDATE user_hotels SET role = ? WHERE user_id = ?', [validRole, targetId]);
+        await tx.run(
+          `UPDATE user_hotels SET role = ? WHERE user_id = ? AND hotel_id IN (${inList(mine)})`,
+          [validRole, targetId, ...mine]
+        );
       }
 
       await tx.run(
@@ -267,8 +342,11 @@ exports.toggleUserStatus = async (req, res) => {
     }
 
     const existing = await db.get('SELECT * FROM users WHERE id = ?', [targetId]);
-    if (!existing) {
+    if (!existing || !(await canManageTarget(req, existing))) {
       return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+    if (!isOwnerRole(req.user.role) && isOwnerRole(existing.role)) {
+      return res.status(403).json({ error: 'Solo un propietario puede activar o desactivar a otro propietario.' });
     }
 
     const newActive = active ? 1 : 0;
@@ -314,6 +392,8 @@ exports.toggleUserStatus = async (req, res) => {
 
 exports.listSessions = async (req, res) => {
   try {
+    const mine = await myHotelIds(req);
+    if (!mine.length) return res.json([]);
     const sessions = await db.query(
       `SELECT
         s.id,
@@ -332,8 +412,10 @@ exports.listSessions = async (req, res) => {
        FROM user_sessions s
        JOIN users u ON s.user_id = u.id
        LEFT JOIN hotels h ON s.hotel_id = h.id
+       WHERE s.hotel_id IN (${inList(mine)})
        ORDER BY s.id DESC
-       LIMIT 100`
+       LIMIT 100`,
+      mine
     );
 
     res.json(sessions);
@@ -353,7 +435,8 @@ exports.revokeSession = async (req, res) => {
       [sessionId]
     );
 
-    if (!session) {
+    const mineForSession = await myHotelIds(req);
+    if (!session || !mineForSession.includes(Number(session.hotel_id))) {
       return res.status(404).json({ error: 'Sesión no encontrada.' });
     }
 
@@ -387,8 +470,10 @@ exports.revokeSession = async (req, res) => {
 exports.listAuditLogs = async (req, res) => {
   try {
     const { hotelId, module, userId } = req.query;
-    const params = [];
-    const conditions = [];
+    const mine = await myHotelIds(req);
+    if (!mine.length) return res.json([]);
+    const params = [...mine];
+    const conditions = [`a.hotel_id IN (${inList(mine)})`];
 
     if (hotelId) {
       conditions.push('a.hotel_id = ?');

@@ -599,6 +599,13 @@ exports.createCashMovement = async (req, res) => {
           'SELECT * FROM cash_registers WHERE id = ? AND hotel_id = ?',
           [Number(register_id), hotelId]
         );
+        // Caja indicada que no existe en ESTE hotel: error explícito (antes se
+        // abría otra caja en silencio y el dinero quedaba donde no se esperaba).
+        if (!targetReg) {
+          const err = new Error('La caja indicada no existe en este establecimiento.');
+          err.statusCode = 404;
+          throw err;
+        }
       } else {
         targetReg = await tx.get(
           "SELECT * FROM cash_registers WHERE hotel_id = ? AND status = 'ABIERTA' ORDER BY id DESC LIMIT 1",

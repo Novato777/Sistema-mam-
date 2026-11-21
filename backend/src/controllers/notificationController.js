@@ -611,27 +611,31 @@ const updateMessagingConfig = async (req, res) => {
       smtp_secure
     } = req.body;
 
+    // Un campo vacío CONSERVA el valor guardado. El formulario de la interfaz
+    // nunca recibe las claves guardadas (por seguridad), así que antes cada
+    // "Guardar" borraba el token de WhatsApp y la clave SMTP sin avisar.
+    const keep = (v) => (v === undefined || v === null || String(v).trim() === '' ? null : String(v).trim());
     await db.run(
       `UPDATE hotels
-       SET whatsapp_phone_number_id = ?,
-           whatsapp_access_token = ?,
-           whatsapp_business_account_id = ?,
-           smtp_host = ?,
-           smtp_port = ?,
-           smtp_user = ?,
-           smtp_pass = ?,
-           smtp_from_email = ?,
+       SET whatsapp_phone_number_id = COALESCE(?, whatsapp_phone_number_id),
+           whatsapp_access_token = COALESCE(?, whatsapp_access_token),
+           whatsapp_business_account_id = COALESCE(?, whatsapp_business_account_id),
+           smtp_host = COALESCE(?, smtp_host),
+           smtp_port = COALESCE(?, smtp_port, 587),
+           smtp_user = COALESCE(?, smtp_user),
+           smtp_pass = COALESCE(?, smtp_pass),
+           smtp_from_email = COALESCE(?, smtp_from_email),
            smtp_secure = ?
        WHERE id = ?`,
       [
-        whatsapp_phone_number_id || null,
-        whatsapp_access_token || null,
-        whatsapp_business_account_id || null,
-        smtp_host || null,
-        Number(smtp_port) || 587,
-        smtp_user || null,
-        smtp_pass || null,
-        smtp_from_email || null,
+        keep(whatsapp_phone_number_id),
+        keep(whatsapp_access_token),
+        keep(whatsapp_business_account_id),
+        keep(smtp_host),
+        Number(smtp_port) || null,
+        keep(smtp_user),
+        keep(smtp_pass),
+        keep(smtp_from_email),
         smtp_secure ? 1 : 0,
         hotelId
       ]

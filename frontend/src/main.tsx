@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './style.css';
+import { installSessionGuard } from './utils/sessionGuard';
+
+installSessionGuard();
 
 ReactDOM.createRoot(document.getElementById('app')!).render(
   <React.StrictMode>

@@ -428,7 +428,7 @@ export default function Configuracion() {
       )}
 
       {loading ? (
-        <p className={`p-10 text-center text-sm font-semibold text-slate-500 ${SECTION('slate')}`}>Cargando…</p>
+        <p className={`p-10 text-center text-sm font-semibold text-slate-500 ${SECTION('indigo')}`}>Cargando…</p>
       ) : (
         <>
           {/* =================================================================
@@ -766,7 +766,7 @@ export default function Configuracion() {
                 {taxes.length === 0 ? (
                   <EmptyText>No hay impuestos configurados.</EmptyText>
                 ) : (
-                  <ul className="space-y-2.5">
+                  <ul className="list-scroll space-y-2.5">
                     {taxes.map((t) => (
                       <li
                         key={t.id}

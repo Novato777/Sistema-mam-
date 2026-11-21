@@ -1,3 +1,4 @@
+const { isHotelMember, hasAssignee } = require('../utils/hotelMembers');
 const db = require('../config/db');
 const { getTodayString, formatDate } = require('../utils/date');
 
@@ -79,10 +80,10 @@ exports.getOverview = async (req, res) => {
     );
 
     const staff = await db.query(
-      `SELECT DISTINCT u.id, u.username, u.full_name, COALESCE(uh.role, u.role) as role
+      `SELECT u.id, u.username, u.full_name, COALESCE(uh.role, u.role) as role
        FROM users u
-       LEFT JOIN user_hotels uh ON uh.user_id = u.id AND uh.hotel_id = ?
-       WHERE u.active = 1 AND (u.role IN ('PROPIETARIO', 'ADMIN') OR uh.active = 1)
+       JOIN user_hotels uh ON uh.user_id = u.id AND uh.hotel_id = ? AND uh.active = 1
+       WHERE u.active = 1
        ORDER BY u.full_name ASC`,
       [hotelId]
     );
@@ -141,6 +142,10 @@ exports.createTicket = async (req, res) => {
       labor_cost = 0,
       evidence = []
     } = req.body;
+
+    if (hasAssignee(assigned_to) && !(await isHotelMember(hotelId, assigned_to))) {
+      return res.status(400).json({ error: 'La persona asignada no pertenece a este establecimiento.' });
+    }
 
     if (!room_id || !title || !String(title).trim()) {
       return res.status(400).json({ error: 'Habitación y título de la solicitud son obligatorios.' });
@@ -285,6 +290,10 @@ exports.startTicket = async (req, res) => {
     const ticketId = Number(req.params.ticketId);
     const { assigned_to, block_room, room_blocked_status } = req.body || {};
 
+    if (hasAssignee(assigned_to) && !(await isHotelMember(hotelId, assigned_to))) {
+      return res.status(400).json({ error: 'La persona asignada no pertenece a este establecimiento.' });
+    }
+
     const ticket = await db.get(
       'SELECT * FROM maintenance_tickets WHERE id = ? AND hotel_id = ?',
       [ticketId, hotelId]
@@ -380,6 +389,10 @@ exports.updateTicket = async (req, res) => {
       description,
       evidence
     } = req.body;
+
+    if (hasAssignee(assigned_to) && !(await isHotelMember(hotelId, assigned_to))) {
+      return res.status(400).json({ error: 'La persona asignada no pertenece a este establecimiento.' });
+    }
 
     const matCost =
       materials_cost !== undefined ? Math.max(0, Number(materials_cost)) : Number(existing.materials_cost || 0);

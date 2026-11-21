@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, User, ArrowLeft, ShieldCheck } from 'lucide-react';
 
 import API_URL from '../config/api';
+import { SESSION_EXPIRED_KEY } from '../utils/sessionGuard';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  // Aviso si llegamos aquí porque la sesión venció o fue revocada
+  const [error, setError] = useState(() => sessionStorage.getItem(SESSION_EXPIRED_KEY) || '');
+  useEffect(() => {
+    sessionStorage.removeItem(SESSION_EXPIRED_KEY);
+  }, []);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 

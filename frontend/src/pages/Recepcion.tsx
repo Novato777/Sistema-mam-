@@ -1276,7 +1276,7 @@ export default function Recepcion() {
           ) : filteredRackRooms.length === 0 ? (
             <EmptyText>No hay habitaciones con este filtro o búsqueda.</EmptyText>
           ) : (
-            <div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+            <div className="list-scroll grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
               {filteredRackRooms.map((r) => {
                 const currentStay = stays.find((s) => s.room_id === r.id && s.status === 'ACTIVA');
                 const v = roomView(r, currentStay);
@@ -1454,7 +1454,7 @@ export default function Recepcion() {
           ) : (
             <>
               {/* Móvil y tablet: tarjetas */}
-              <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="list-scroll lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {filteredStays.map((s) => {
                   const hasDebt = Number(s.balance || 0) > 0;
                   const isActive = s.status === 'ACTIVA';
@@ -2022,7 +2022,7 @@ export default function Recepcion() {
           ) : (
             <>
               {/* Móvil y tablet: tarjetas */}
-              <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="list-scroll lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {filteredGuests.map((g) => {
                   const hasDebt = Number(g.pending_balance || 0) > 0;
                   const isVip = g.vip_status === 1;

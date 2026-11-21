@@ -524,7 +524,7 @@ export default function Notificaciones() {
               <p className="text-xs mt-1">No hay notificaciones activas con los filtros actuales.</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="list-scroll space-y-2">
               {notifications.map((n) => (
                 <div
                   key={n.id}
@@ -738,7 +738,7 @@ export default function Notificaciones() {
       {/* TAB 3: PLANTILLAS */}
       {activeTab === 'plantillas' && (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="list-scroll grid grid-cols-1 md:grid-cols-2 gap-4">
             {templates.map((tpl) => (
               <div
                 key={tpl.id}

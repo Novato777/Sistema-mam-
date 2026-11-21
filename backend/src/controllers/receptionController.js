@@ -1,5 +1,5 @@
 const db = require('../config/db');
-const { getTodayString, formatDate, addDaysToDateStr } = require('../utils/date');
+const { getTodayString, formatDate, addDaysToDateStr, getDaysDifference } = require('../utils/date');
 const { postByRuleInTransaction, isBankMethod } = require('./accountingController');
 
 // Asegura una caja abierta en el hotel para registrar cobros/abonos de recepción
@@ -1026,9 +1026,11 @@ exports.addFolioCharge = async (req, res) => {
     const { type, description, amount } = req.body;
 
     const numAmount = Number(amount);
-    if (!description || isNaN(numAmount) || numAmount === 0) {
+    // Solo montos positivos: un "cargo" negativo restaba deuda sin dejar
+    // contabilidad ni caja (cualquiera podía borrar lo que debe un huésped).
+    if (!description || !String(description).trim() || !Number.isFinite(numAmount) || numAmount <= 0) {
       return res.status(400).json({
-        error: 'Descripción y monto válido son obligatorios para registrar un cargo en el folio.'
+        error: 'Escribe qué se cobra y un valor mayor a cero.'
       });
     }
 
@@ -1123,6 +1125,26 @@ exports.addFolioPayment = async (req, res) => {
 
     if (!stayInfo) {
       return res.status(404).json({ error: 'Estancia o folio no encontrado.' });
+    }
+    if (stayInfo.status && stayInfo.status !== 'ACTIVA') {
+      return res.status(400).json({ error: 'Esta estadía ya terminó; no se le pueden registrar abonos.' });
+    }
+
+    // Tope contra errores de digitación (un cero de más entraba a caja como
+    // dinero real). Se permite pagar por adelantado las noches que faltan.
+    const acct = await db.get('SELECT balance FROM guest_accounts WHERE id = ? AND hotel_id = ?', [
+      stayInfo.account_id,
+      hotelId
+    ]);
+    const rate = Number(stayInfo.rate_per_period || 0);
+    const nightsLeft = stayInfo.expected_check_out
+      ? Math.max(1, getDaysDifference(getTodayString(), String(stayInfo.expected_check_out).slice(0, 10)) + 1)
+      : 30;
+    const maxAllowed = Number(acct?.balance || 0) + rate * nightsLeft;
+    if (maxAllowed > 0 && numAmount > maxAllowed) {
+      return res.status(400).json({
+        error: `El abono ($${Math.round(numAmount).toLocaleString('es-CO')}) es mayor que lo que debe el huésped más las noches que le faltan ($${Math.round(maxAllowed).toLocaleString('es-CO')}). Revisa el valor.`
+      });
     }
 
     const today = getTodayString();

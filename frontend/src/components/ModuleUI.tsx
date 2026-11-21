@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AlertTriangle, CheckCircle2, Search, X } from 'lucide-react';
 
 /* =========================================================================
@@ -23,21 +23,22 @@ export type Tone = 'slate' | 'emerald' | 'rose' | 'amber' | 'sky' | 'indigo' | '
 
 /** Relleno tenue + contorno definido para cada familia de color. */
 const TONES: Record<Tone, string> = {
-  slate: 'bg-slate-200 dark:bg-slate-800 border-slate-500 dark:border-slate-400',
-  emerald: 'bg-emerald-200 dark:bg-emerald-500/25 border-emerald-500 dark:border-emerald-400',
-  rose: 'bg-rose-200 dark:bg-rose-500/25 border-rose-500 dark:border-rose-400',
-  amber: 'bg-amber-200 dark:bg-amber-500/25 border-amber-500 dark:border-amber-400',
-  sky: 'bg-sky-200 dark:bg-sky-500/25 border-sky-500 dark:border-sky-400',
-  indigo: 'bg-indigo-200 dark:bg-indigo-500/25 border-indigo-500 dark:border-indigo-400',
-  violet: 'bg-violet-200 dark:bg-violet-500/25 border-violet-500 dark:border-violet-400',
-  teal: 'bg-teal-200 dark:bg-teal-500/25 border-teal-500 dark:border-teal-400'
+  slate: 'bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-600',
+  emerald: 'bg-emerald-200 dark:bg-emerald-500/20 border-emerald-300 dark:border-emerald-500/40',
+  rose: 'bg-rose-200 dark:bg-rose-500/20 border-rose-300 dark:border-rose-500/40',
+  amber: 'bg-amber-200 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/40',
+  sky: 'bg-sky-200 dark:bg-sky-500/20 border-sky-300 dark:border-sky-500/40',
+  indigo: 'bg-indigo-200 dark:bg-indigo-500/20 border-indigo-300 dark:border-indigo-500/40',
+  violet: 'bg-violet-200 dark:bg-violet-500/20 border-violet-300 dark:border-violet-500/40',
+  teal: 'bg-teal-200 dark:bg-teal-500/20 border-teal-300 dark:border-teal-500/40'
 };
 
 /** Clases de una tarjeta con color tenue y contorno marcado. */
-export const tone = (t: Tone) => `border shadow-sm ${TONES[t]}`;
+export const tone = (t: Tone) => `border ${TONES[t]}`;
 
 /** Versión plana (sin sombra). strong = contorno de 2px para tarjetas principales. */
-export const flat = (t: Tone, strong = false) => `${strong ? 'border-2' : 'border'} ${TONES[t]}`;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const flat = (t: Tone, _strong = false) => `border ${TONES[t]}`;
 
 /** Fondo sólido por familia (íconos, números de paso, etiquetas de estado). */
 export const SOLID: Record<Tone, string> = {
@@ -53,19 +54,30 @@ export const SOLID: Record<Tone, string> = {
 
 /** Contorno de 2px por familia, para secciones planas. */
 const EDGE: Record<Tone, string> = {
-  slate: 'border-slate-500 dark:border-slate-500',
-  emerald: 'border-emerald-600 dark:border-emerald-500',
-  rose: 'border-rose-600 dark:border-rose-500',
-  amber: 'border-amber-600 dark:border-amber-500',
-  sky: 'border-sky-600 dark:border-sky-500',
-  indigo: 'border-indigo-600 dark:border-indigo-500',
-  violet: 'border-violet-600 dark:border-violet-500',
-  teal: 'border-teal-600 dark:border-teal-500'
+  slate: 'border-slate-200 dark:border-slate-700',
+  emerald: 'border-emerald-200 dark:border-emerald-500/40',
+  rose: 'border-rose-200 dark:border-rose-500/40',
+  amber: 'border-amber-200 dark:border-amber-500/40',
+  sky: 'border-sky-200 dark:border-sky-500/40',
+  indigo: 'border-indigo-200 dark:border-indigo-500/40',
+  violet: 'border-violet-200 dark:border-violet-500/40',
+  teal: 'border-teal-200 dark:border-teal-500/40'
 };
 
-/** Sección plana: contorno de 2px del tono indicado. */
-export const SECTION = (t: Tone) =>
-  `rounded-2xl overflow-hidden border-2 ${EDGE[t]} bg-white/95 dark:bg-slate-900`;
+/** Cuerpo de las secciones: color del tono (modo claro), fondo liso en modo oscuro. */
+const BODY: Record<Tone, string> = {
+  slate: 'bg-slate-100 dark:bg-slate-900',
+  emerald: 'bg-emerald-100 dark:bg-slate-900',
+  rose: 'bg-rose-100 dark:bg-slate-900',
+  amber: 'bg-amber-100 dark:bg-slate-900',
+  sky: 'bg-sky-100 dark:bg-slate-900',
+  indigo: 'bg-indigo-100 dark:bg-slate-900',
+  violet: 'bg-violet-100 dark:bg-slate-900',
+  teal: 'bg-teal-100 dark:bg-slate-900'
+};
+
+/** Sección: contorno de 2px y cuerpo con el color del tono. */
+export const SECTION = (t: Tone) => `rounded-2xl overflow-hidden border ${EDGE[t]} ${BODY[t]}`;
 
 /**
  * Encabezado de sección: franja de color SÓLIDO con texto blanco.
@@ -96,7 +108,7 @@ export const toneFromBg = (bg: string): Tone =>
  * ".dark .bg-white" a un tono casi invisible.
  */
 export const SURFACE =
-  'bg-white/95 dark:bg-slate-900 border border-indigo-100 dark:border-slate-700 shadow-md shadow-indigo-200/40 dark:shadow-sm dark:shadow-black/20';
+  'bg-indigo-100 dark:bg-slate-900 border border-indigo-200 dark:border-slate-700';
 
 export const money = (val: number | string | null | undefined) =>
   Number(val || 0).toLocaleString('es-CO');
@@ -135,7 +147,7 @@ export function StatCard({
       </div>
       <div className="min-w-0">
         <span
-          className={`font-black block break-all leading-tight ${compact ? 'text-base sm:text-xl' : 'text-xl sm:text-2xl'}`}
+          className={`font-black block tabular-nums leading-tight [overflow-wrap:anywhere] ${compact ? 'text-sm min-[400px]:text-base sm:text-xl' : 'text-lg min-[400px]:text-xl sm:text-2xl'}`}
         >
           {value}
         </span>
@@ -406,7 +418,7 @@ export function Panel({
   if (accent) {
     return (
       <section
-        className={`rounded-2xl overflow-hidden border-2 ${EDGE[accent]} bg-white/95 dark:bg-slate-900 ${className}`}
+        className={`${SECTION(accent)} ${className}`}
       >
         <header
           className={`${SECTION_HEAD(accent)} flex flex-col sm:flex-row sm:items-center justify-between gap-3`}
@@ -581,9 +593,18 @@ export function Modal({
   size?: keyof typeof MODAL_SIZE;
   children: React.ReactNode;
 }) {
+  // Cerrar con la tecla Escape (tocar fuera NO cierra, para no perder lo escrito).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
   const body = (
     <>
-      <div className={`${color} text-white px-5 py-4 flex items-start justify-between gap-3 shrink-0`}>
+      <div className={`${color} text-white px-4 sm:px-5 py-4 flex items-start justify-between gap-3 shrink-0`}>
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
             {icon}
@@ -602,15 +623,15 @@ export function Modal({
           <X className="w-5 h-5" />
         </button>
       </div>
-      <div className="p-5 space-y-5 overflow-y-auto flex-1">{children}</div>
+      <div className="p-4 sm:p-5 space-y-5 overflow-y-auto overscroll-contain flex-1 min-h-0">{children}</div>
       {footer && (
-        <div className="p-4 border-t border-slate-300 dark:border-slate-700 grid grid-flow-col auto-cols-fr gap-2 shrink-0">
+        <div className="modal-footer p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] border-t border-slate-300 dark:border-slate-700 flex flex-wrap gap-2 shrink-0">
           {footer}
         </div>
       )}
     </>
   );
-  const shell = `w-full ${MODAL_SIZE[size]} max-h-[94vh] sm:max-h-[90vh] flex flex-col bg-white/95 dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl`;
+  const shell = `modal-shell w-full ${MODAL_SIZE[size]} max-h-[94vh] max-h-[94dvh] sm:max-h-[90vh] sm:max-h-[90dvh] flex flex-col bg-white/95 dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl`;
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 sm:p-4"

@@ -538,7 +538,7 @@ export const Limpieza: React.FC = () => {
       )}
 
       {/* Encabezado Principal + Selector Modo Móvil Camarera vs. Supervisión */}
-      <div className="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 rounded-2xl p-6 text-white shadow-lg border border-teal-800/40">
+      <div className="bg-teal-800 rounded-2xl p-6 text-white border border-teal-700">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5 text-teal-300 text-xs font-semibold uppercase tracking-wider mb-1">
@@ -739,7 +739,7 @@ export const Limpieza: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="list-scroll grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredTasks.map((t) => {
                 const stBadge = TASK_STATUS_BADGE[t.status] || {
                   label: t.status,
@@ -1195,7 +1195,7 @@ export const Limpieza: React.FC = () => {
 
           {/* PESTAÑA 2: MAPA VISUAL DE HABITACIONES PARA HOUSEKEEPING */}
           {activeTab === 'rooms' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="list-scroll grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {rooms.map((r) => {
                 const st = ROOM_STATUS_STYLE[r.status] || {
                   label: r.status,
@@ -1327,7 +1327,7 @@ export const Limpieza: React.FC = () => {
 
           {/* PESTAÑA 3: PERSONAL DE LIMPIEZA Y RENDIMIENTO */}
           {activeTab === 'staff' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="list-scroll grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {staff.map((member) => (
                 <div
                   key={member.id}

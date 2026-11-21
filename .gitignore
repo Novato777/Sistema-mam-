@@ -12,9 +12,10 @@ frontend/dist/
 *.sqlite
 backend/*.db
 
-# Environment variables
+# Environment variables (las credenciales NUNCA van al repositorio)
 .env
-.env.local
+.env.*
+!.env.example
 
 # Logs
 *.log
@@ -23,3 +24,9 @@ backend/*.db
 .DS_Store
 .vscode/
 .idea/
+
+# Archivos temporales de SQLite (modo WAL) y respaldos locales
+*.db-wal
+*.db-shm
+*.db-journal
+backend/backups/

@@ -517,7 +517,7 @@ export default function Personal() {
                 text="Agrega a quienes trabajan contigo para asignarles turnos y que entren al sistema."
               />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              <div className="list-scroll grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {activeStaff.map((m) => (
                   <PersonCard
                     key={m.id}
@@ -553,7 +553,7 @@ export default function Personal() {
                   subtitle="No pueden entrar al sistema. Puedes devolverles el acceso."
                   icon={<Power className="w-5 h-5 shrink-0" />}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  <div className="list-scroll grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                     {inactiveStaff.map((m) => (
                       <PersonCard
                         key={m.id}

@@ -673,7 +673,7 @@ export default function Restaurante() {
             <Clock className="w-5 h-5 shrink-0" />
             Hay {openOrders.length} consumo{openOrders.length === 1 ? '' : 's'} sin cobrar
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="list-scroll grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {openOrders.map((o) => (
               <div
                 key={o.id}
@@ -747,7 +747,7 @@ export default function Restaurante() {
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <div className="list-scroll grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                   {visibleCatalog.map((item) => {
                     const g = groupOf(item.department);
                     const qty = qtyOf(item.id);
@@ -1014,7 +1014,7 @@ export default function Restaurante() {
             <StatCard variant="flat" color="bg-violet-700" label="A habitación" value={formatCOP(report?.summary.room_charge_total || 0)} compact />
           </div>
 
-          <section className={SECTION('slate')}>
+          <section className={SECTION('amber')}>
             {!report ? (
               <p className="p-10 text-center text-sm font-semibold text-slate-500">Cargando ventas…</p>
             ) : report.orders.length === 0 ? (
@@ -1023,7 +1023,7 @@ export default function Restaurante() {
                 <p className="text-sm font-semibold text-slate-500">No hay ventas en este periodo.</p>
               </div>
             ) : (
-              <ul className="divide-y divide-slate-200 dark:divide-slate-700">
+              <ul className="list-scroll divide-y divide-slate-200 dark:divide-slate-700">
                 {report.orders.map((o) => {
                   const st = statusInfo(o);
                   const isVoid = o.status === 'ANULADA';
@@ -1101,11 +1101,11 @@ export default function Restaurante() {
             </section>
           )}
 
-          <section className={SECTION('slate')}>
+          <section className={SECTION('violet')}>
             {catalog.length === 0 ? (
               <p className="p-10 text-center text-sm font-semibold text-slate-500">Aún no tienes productos.</p>
             ) : (
-              <ul className="divide-y divide-slate-200 dark:divide-slate-700">
+              <ul className="list-scroll divide-y divide-slate-200 dark:divide-slate-700">
                 {catalog.map((c) => {
                   const g = groupOf(c.department);
                   const on = Number(c.active) === 1;

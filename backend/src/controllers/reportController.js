@@ -58,10 +58,9 @@ exports.getReportsOverview = async (req, res) => {
     const totalAvailableRoomNights = totalRoomsCount * daysInPeriod;
 
     const users = await db.query(
-      `SELECT DISTINCT u.id, u.username, u.full_name, COALESCE(uh.role, u.role) as role
+      `SELECT u.id, u.username, u.full_name, COALESCE(uh.role, u.role) as role
        FROM users u
-       LEFT JOIN user_hotels uh ON uh.user_id = u.id AND uh.hotel_id = ?
-       WHERE u.role IN ('PROPIETARIO', 'ADMIN') OR uh.active = 1
+       JOIN user_hotels uh ON uh.user_id = u.id AND uh.hotel_id = ? AND uh.active = 1
        ORDER BY u.full_name ASC`,
       [hotelId]
     );

@@ -1,9 +1,10 @@
 const crypto = require('crypto');
+const { publicHotel, publicHotels } = require('../utils/publicHotel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const { getTodayString } = require('../utils/date');
-const { secretKey } = require('../middleware/auth');
+const { getJwtSecret } = require('../config/secrets');
 const {
   PERMISSIONS_CATALOG,
   ROLES_DEFINITION,
@@ -11,14 +12,14 @@ const {
 } = require('../config/permissions');
 
 const getAccessibleHotelsForUser = async (user) => {
-  return await db.query(
+  return publicHotels(await db.query(
     `SELECT h.*, uh.role as user_role
      FROM hotels h
      JOIN user_hotels uh ON uh.hotel_id = h.id
      WHERE uh.user_id = ? AND uh.active = 1 AND h.active = 1
      ORDER BY h.id ASC`,
     [user.id]
-  );
+  ));
 };
 
 exports.login = async (req, res) => {
@@ -29,7 +30,8 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const user = await db.get('SELECT * FROM users WHERE username = ?', [username.trim()]);
+    // Los usuarios se guardan en minúsculas: comparar sin distinguir mayúsculas.
+    const user = await db.get('SELECT * FROM users WHERE LOWER(username) = ?', [String(username).trim().toLowerCase()]);
 
     if (!user) {
       return res.status(400).json({ error: 'Nombre de usuario o contraseña incorrectos.' });
@@ -78,7 +80,7 @@ exports.login = async (req, res) => {
         default_hotel_id: defaultHotelId,
         jti: sessionToken
       },
-      secretKey,
+      getJwtSecret(),
       { expiresIn: '7d' }
     );
 

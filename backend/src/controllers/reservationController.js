@@ -29,6 +29,10 @@ const normalizeInterval = (checkInStr, checkOutStr) => {
   return { start, end, nights };
 };
 
+/** true si la salida es ANTES de la llegada (error del usuario que antes se corregía en silencio). */
+const datesReversed = (checkInStr, checkOutStr) =>
+  !!checkInStr && !!checkOutStr && formatDate(checkOutStr) < formatDate(checkInStr);
+
 /**
  * Detecta conflictos de disponibilidad para una lista de habitaciones en el rango [start, end).
  * Verifica:
@@ -613,6 +617,9 @@ exports.createReservation = async (req, res) => {
       });
     }
 
+    if (datesReversed(effectiveCheckIn, effectiveCheckOut)) {
+      return res.status(400).json({ error: 'La fecha de salida no puede ser antes de la fecha de llegada.' });
+    }
     const { start, end, nights } = normalizeInterval(effectiveCheckIn, effectiveCheckOut);
     const today = getTodayString();
 
@@ -678,9 +685,12 @@ exports.createReservation = async (req, res) => {
         );
         if (existingGuest) {
           guestId = existingGuest.id;
+          // El huésped ya existe (mismo documento): solo se actualizan contacto.
+          // Antes se escribía el nombre completo en first_name conservando
+          // last_name, y la ficha quedaba como "Juan Pérez Pérez".
           await tx.run(
-            'UPDATE guests SET first_name = ?, phone = COALESCE(?, phone), email = COALESCE(?, email) WHERE id = ?',
-            [guest_name.trim(), guest_phone || null, guest_email || null, guestId]
+            'UPDATE guests SET phone = COALESCE(?, phone), email = COALESCE(?, email) WHERE id = ? AND hotel_id = ?',
+            [guest_phone || null, guest_email || null, guestId, hotelId]
           );
         }
       }
@@ -876,10 +886,12 @@ exports.updateReservation = async (req, res) => {
       });
     }
 
-    const { start, end, nights } = normalizeInterval(
-      check_in_expected || check_in_date || existing.check_in_expected,
-      check_out_expected || check_out_date || existing.check_out_expected
-    );
+    const newIn = check_in_expected || check_in_date || existing.check_in_expected;
+    const newOut = check_out_expected || check_out_date || existing.check_out_expected;
+    if (datesReversed(newIn, newOut)) {
+      return res.status(400).json({ error: 'La fecha de salida no puede ser antes de la fecha de llegada.' });
+    }
+    const { start, end, nights } = normalizeInterval(newIn, newOut);
 
     let requestedRooms = [];
     if (Array.isArray(customRooms) && customRooms.length > 0) {
@@ -1084,6 +1096,15 @@ exports.registerAdvancePayment = async (req, res) => {
       [reservationId, hotelId]
     );
     if (!rv) return res.status(404).json({ error: 'Reserva no encontrada.' });
+    if (['CANCELADA', 'NO_SHOW', 'CHECKED_IN', 'FINALIZADA'].includes(rv.status)) {
+      return res.status(400).json({ error: 'Esta reserva ya no recibe anticipos (está cancelada, no llegó o ya hizo check-in).' });
+    }
+    const pending = Math.max(0, Number(rv.total_price || 0) - Number(rv.advance_paid || 0));
+    if (Number(rv.total_price || 0) > 0 && payAmount > pending + 0.5) {
+      return res.status(400).json({
+        error: `El anticipo ($${Math.round(payAmount).toLocaleString('es-CO')}) es mayor que lo que falta por pagar de la reserva ($${Math.round(pending).toLocaleString('es-CO')}).`
+      });
+    }
 
     const today = getTodayString();
     const newAdvance = Number(rv.advance_paid || 0) + payAmount;

@@ -1,8 +1,9 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { HotelProvider } from './context/HotelContext';
 import Layout from './components/Layout';
+import ErrorBoundary from './components/ErrorBoundary';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -22,15 +23,23 @@ import Notificaciones from './pages/Notificaciones';
 import Configuracion from './pages/Configuracion';
 import MasterSaaS from './pages/MasterSaaS';
 
-// Guard de Autenticación con Contexto Multi-Tenant
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+// Guard de Autenticación con Contexto Multi-Tenant.
+// Es una ruta de layout: HotelProvider y Layout se montan UNA sola vez y solo
+// cambia la página interna (<Outlet />). Así, al navegar entre módulos no se
+// vuelve a pedir /api/auth/me ni /api/hotels, ni parpadea el menú.
+function ProtectedLayout() {
+  const location = useLocation();
   const token = localStorage.getItem('token');
   if (!token) {
     return <Navigate to="/login" replace />;
   }
   return (
     <HotelProvider>
-      <Layout>{children}</Layout>
+      <Layout>
+        <ErrorBoundary resetKey={location.pathname}>
+          <Outlet />
+        </ErrorBoundary>
+      </Layout>
     </HotelProvider>
   );
 }
@@ -43,161 +52,28 @@ export default function App() {
           {/* Ruta pública de Landing */}
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/master" element={<MasterSaaS />} />
+          <Route path="/master" element={<ErrorBoundary><MasterSaaS /></ErrorBoundary>} />
 
-          {/* Rutas Protegidas del PMS */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/hotels/:hotelId"
-            element={
-              <ProtectedRoute>
-                <Hotel />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/hotel-1"
-            element={
-              <ProtectedRoute>
-                <Hotel />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/hotel-2"
-            element={
-              <ProtectedRoute>
-                <Hotel />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/reservas"
-            element={
-              <ProtectedRoute>
-                <Reservas />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/recepcion"
-            element={
-              <ProtectedRoute>
-                <Recepcion />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/caja"
-            element={
-              <ProtectedRoute>
-                <Caja />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/limpieza"
-            element={
-              <ProtectedRoute>
-                <Limpieza />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/restaurante"
-            element={
-              <ProtectedRoute>
-                <Restaurante />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/inventario"
-            element={
-              <ProtectedRoute>
-                <Inventario />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/contabilidad"
-            element={
-              <ProtectedRoute>
-                <Contabilidad />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/mantenimiento"
-            element={
-              <ProtectedRoute>
-                <Mantenimiento />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/personal"
-            element={
-              <ProtectedRoute>
-                <Personal />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/reportes"
-            element={
-              <ProtectedRoute>
-                <Reportes />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/usuarios"
-            element={
-              <ProtectedRoute>
-                <Usuarios />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/notificaciones"
-            element={
-              <ProtectedRoute>
-                <Notificaciones />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/configuracion"
-            element={
-              <ProtectedRoute>
-                <Configuracion />
-              </ProtectedRoute>
-            }
-          />
+          {/* Rutas Protegidas del PMS (comparten un solo Layout) */}
+          <Route element={<ProtectedLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/hotels/:hotelId" element={<Hotel />} />
+            <Route path="/hotel-1" element={<Hotel />} />
+            <Route path="/hotel-2" element={<Hotel />} />
+            <Route path="/reservas" element={<Reservas />} />
+            <Route path="/recepcion" element={<Recepcion />} />
+            <Route path="/caja" element={<Caja />} />
+            <Route path="/limpieza" element={<Limpieza />} />
+            <Route path="/restaurante" element={<Restaurante />} />
+            <Route path="/inventario" element={<Inventario />} />
+            <Route path="/contabilidad" element={<Contabilidad />} />
+            <Route path="/mantenimiento" element={<Mantenimiento />} />
+            <Route path="/personal" element={<Personal />} />
+            <Route path="/reportes" element={<Reportes />} />
+            <Route path="/usuarios" element={<Usuarios />} />
+            <Route path="/notificaciones" element={<Notificaciones />} />
+            <Route path="/configuracion" element={<Configuracion />} />
+          </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

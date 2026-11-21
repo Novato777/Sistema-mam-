@@ -325,7 +325,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="relative space-y-8 animate-fade-in pb-10">
+    <div className="relative overflow-x-clip space-y-8 animate-fade-in pb-10">
       <div className="absolute top-[-8%] left-[-12%] w-[350px] h-[350px] bg-indigo-200/30 dark:bg-indigo-500/15 rounded-full blur-[90px] -z-10 pointer-events-none"></div>
       <div className="absolute bottom-[-8%] right-[-8%] w-[350px] h-[350px] bg-teal-200/25 dark:bg-teal-500/15 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
 
@@ -498,7 +498,7 @@ export default function Dashboard() {
           </div>
 
           {/* 6. Ocupación Porcentual */}
-          <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white p-4 rounded-2xl shadow-sm">
+          <div className="bg-indigo-700 text-white p-4 rounded-2xl">
             <div className="flex items-center justify-between text-indigo-100">
               <span className="text-[11px] font-bold uppercase tracking-wider">% Ocupación</span>
               <Activity className="w-4 h-4" />
@@ -594,7 +594,7 @@ export default function Dashboard() {
               </span>
               <span className="text-[11px] text-slate-400">Clic para operar en Recepción</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="list-scroll grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2.5">
               {(dashboardData?.rooms.rack || []).map((r) => {
                 const badgeStyles =
                   r.category === 'OCCUPIED'

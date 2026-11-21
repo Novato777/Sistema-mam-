@@ -1,3 +1,4 @@
+require('dotenv').config({ quiet: true });
 process.env.TZ = 'America/Bogota';
 
 const express = require('express');
@@ -9,25 +10,35 @@ const initDatabase = require('./db/init');
 const app = express();
 const PORT = process.env.PORT || 4001;
 
+// Detrás del proxy del hosting (Render, Railway, Nginx) req.ip sería la IP del
+// proxy y TODOS los usuarios compartirían el mismo cupo del limitador.
+// TRUST_PROXY: número de proxies (por defecto 1 en producción, 0 en local).
+const trustProxy = process.env.TRUST_PROXY ?? ((process.env.NODE_ENV === 'production' || process.env.DATABASE_URL) ? '1' : '0');
+app.set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
+
 // 1. Cabeceras de seguridad seguras con Helmet
 app.use(helmet());
 
 // 2. CORS restringido y seguro
-const allowedOrigins = [
-  'http://localhost:5174',
-  'http://localhost:5173',
-  process.env.FRONTEND_URL
-].filter(Boolean);
+// FRONTEND_URL admite varias URLs separadas por comas (ej. dominio propio y el de Vercel).
+// Si no se define, se permite *.vercel.app para no dejar el sistema caído, con aviso.
+const frontendUrls = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map((u) => u.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+const allowedOrigins = ['http://localhost:5174', 'http://localhost:5173', ...frontendUrls];
+const allowVercelPreviews = process.env.ALLOW_VERCEL_PREVIEWS === '1' || frontendUrls.length === 0;
+if (frontendUrls.length === 0) {
+  console.warn('⚠ SEGURIDAD: FRONTEND_URL no está configurado; se acepta cualquier origen *.vercel.app. Define FRONTEND_URL en producción.');
+}
 
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    const isAllowed = allowedOrigins.includes(origin) || origin.endsWith('.vercel.app');
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      callback(new Error('Petición bloqueada por políticas CORS'));
-    }
+    const isAllowed = allowedOrigins.includes(origin) || (allowVercelPreviews && origin.endsWith('.vercel.app'));
+    // Origen no permitido: se responde sin cabeceras CORS y el navegador bloquea
+    // la petición (sin lanzar error 500 ni llenar el log).
+    callback(null, isAllowed);
   },
   credentials: true
 }));
@@ -46,10 +57,13 @@ const authLimiter = rateLimit({
   max: 40,
   keyGenerator: (req) => req.ip || '127.0.0.1',
   validate: false,
+  // Solo cuentan los intentos fallidos: varios empleados detrás de la misma IP
+  // del hotel pueden iniciar sesión sin agotar el cupo.
+  skipSuccessfulRequests: true,
   message: { error: 'Demasiados intentos de inicio de sesión. Por seguridad, espera 15 minutos.' }
 });
 
-app.use(express.json());
+app.use(express.json({ limit: process.env.JSON_LIMIT || '1mb' }));
 
 // Montar rutas Multi-Tenant y RBAC
 const authRoutes = require('./routes/auth');
@@ -58,7 +72,12 @@ const hotelConfigRoutes = require('./routes/hotelConfigRoutes');
 const hotelRoutes = require('./routes/hotelRoutes');
 const saasMasterRoutes = require('./routes/saasMasterRoutes');
 
-app.use('/api/auth', authLimiter, authRoutes);
+// El límite estricto aplica SOLO a los intentos de inicio de sesión. Antes cubría
+// todo /api/auth, incluido GET /me (que el frontend llama al cargar), y un hotel
+// con varios empleados en la misma IP recibía 429 y el menú quedaba vacío.
+app.post('/api/auth/login', authLimiter);
+app.post('/api/saas-master/login', authLimiter);
+app.use('/api/auth', generalLimiter, authRoutes);
 app.use('/api/users', generalLimiter, userRoutes);
 app.use('/api/saas-master', generalLimiter, saasMasterRoutes);
 
@@ -78,7 +97,14 @@ app.get('/', (req, res) => {
 });
 
 // Inicializar la base de datos
-app.ready = initDatabase().then(() => {
+// withBootLock: si varias instancias arrancan a la vez (PostgreSQL), solo una
+// crea/migra el esquema; las demás esperan y luego encuentran todo listo.
+const db = require('./config/db');
+const { loadSecrets } = require('./config/secrets');
+app.ready = db.withBootLock(async () => {
+  await initDatabase();
+  await loadSecrets();
+}).then(() => {
   if (require.main === module) {
     app.listen(PORT, () => {
       console.log(`Servidor PMS escuchando en http://localhost:${PORT}`);

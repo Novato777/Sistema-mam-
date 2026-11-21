@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { publicHotel, publicHotels } = require('../utils/publicHotel');
 const { getTodayString, formatDate, addDaysToDateStr, getDaysDifference } = require('../utils/date');
 
 const getPaymentIntervalDays = (paymentType) => {
@@ -518,7 +519,7 @@ exports.getDashboard = async (req, res) => {
     }
 
     res.json({
-      hotel: req.hotel,
+      hotel: publicHotel(req.hotel),
       generated_at: new Date().toISOString(),
       rooms: {
         total: totalRooms,

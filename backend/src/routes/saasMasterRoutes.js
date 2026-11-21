@@ -1,16 +1,40 @@
 const express = require('express');
+const { publicHotel, publicHotels } = require('../utils/publicHotel');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const db = require('../config/db');
 const { getTodayString } = require('../utils/date');
 const initDatabase = require('../db/init');
 
-// Clave secreta o credenciales para el panel de superadministrador SaaS
-const MASTER_SECRET = process.env.MASTER_SECRET || 'admin123';
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const { getJwtSecret, isProduction } = require('../config/secrets');
+
+// Credenciales del panel de superadministrador SaaS (fijas del proyecto).
+//   usuario: admin
+// La contraseña se guarda SOLO como hash bcrypt (nunca en texto plano).
+// Para cambiarla, genera un hash nuevo y reemplázalo aquí:
+//   node -e "console.log(require('bcryptjs').hashSync('NuevaClave', 12))"
+const MASTER_USERNAME = 'admin';
+const MASTER_PASSWORD_HASH = '$2b$12$azuETd9YlY9Z7b3Gwujk1Oc6GVZ8/FWs9JK/GNRIcpfmrSDBYU1OG';
+// Solo en desarrollo local se aceptan además las claves de prueba.
+const DEV_MASTER_PASSWORDS = ['admin123', 'adminpassword123'];
+
+/** Verifica la contraseña del panel contra la clave fija del proyecto. */
+const checkMasterPassword = async (password) => {
+  if (await bcrypt.compare(password, MASTER_PASSWORD_HASH)) return true;
+  return !isProduction() && DEV_MASTER_PASSWORDS.some((p) => safeEqual(password, p));
+};
+
+const safeEqual = (a, b) => {
+  const ha = crypto.createHash('sha256').update(String(a)).digest();
+  const hb = crypto.createHash('sha256').update(String(b)).digest();
+  return crypto.timingSafeEqual(ha, hb);
+};
 
 /**
  * 1. Acceso al Panel Master SaaS
- * Valida credenciales de Super Administrador (username: admin, password: admin123 o MASTER_SECRET)
+ * Valida credenciales de Super Administrador (ver configuración arriba)
  */
 router.post('/login', async (req, res) => {
   try {
@@ -23,17 +47,19 @@ router.post('/login', async (req, res) => {
     const cleanUser = String(username).trim().toLowerCase();
     const cleanPass = String(password).trim();
 
-    // Verificación de credenciales maestras SaaS (Acepta admin123 o adminpassword123 por comodidad)
-    const isMasterUser = cleanUser === 'admin';
-    const isMasterPass = cleanPass === MASTER_SECRET || cleanPass === 'admin123' || cleanPass === 'adminpassword123';
+    const isMasterUser = safeEqual(cleanUser, MASTER_USERNAME);
+    const isMasterPass = await checkMasterPassword(cleanPass);
 
     if (!isMasterUser || !isMasterPass) {
       return res.status(401).json({ error: 'Credenciales de Super Administrador inválidas.' });
     }
 
+    // Token firmado (antes era un texto adivinable que cualquiera podía inventar)
+    const signed = jwt.sign({ scope: 'SAAS_MASTER', sub: cleanUser }, getJwtSecret(), { expiresIn: '12h' });
+
     res.json({
       success: true,
-      master_token: 'SAAS-MASTER-' + Buffer.from(`${cleanUser}:${Date.now()}`).toString('base64'),
+      master_token: 'SAAS-MASTER-' + signed,
       message: 'Acceso autorizado al Panel de Gestión de Clientes SaaS.'
     });
   } catch (error) {
@@ -48,7 +74,13 @@ const requireMasterAuth = (req, res, next) => {
   if (!auth || !auth.startsWith('Bearer SAAS-MASTER-')) {
     return res.status(403).json({ error: 'Acceso denegado: Se requiere sesión de Super Administrador SaaS.' });
   }
-  next();
+  try {
+    const payload = jwt.verify(auth.slice('Bearer SAAS-MASTER-'.length), getJwtSecret());
+    if (payload.scope !== 'SAAS_MASTER') throw new Error('scope');
+    return next();
+  } catch (_) {
+    return res.status(401).json({ error: 'La sesión del Panel Master venció o no es válida. Ingresa de nuevo.' });
+  }
 };
 
 /**
@@ -78,7 +110,7 @@ router.get('/clients', requireMasterAuth, async (req, res) => {
     const enriched = hotels.map((h) => {
       const hotelUsers = users.filter((u) => u.hotel_id === h.id);
       return {
-        ...h,
+        ...publicHotel(h),
         owners: hotelUsers
       };
     });

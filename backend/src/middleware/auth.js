@@ -2,7 +2,9 @@ const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const { resolveEffectivePermissions } = require('../config/permissions');
 
-const secretKey = process.env.JWT_SECRET || 'supersecretkeyforfamilyadminapp1234567890';
+// La clave viene de JWT_SECRET o de una clave aleatoria guardada en la base
+// (ver config/secrets.js). Nunca de un texto fijo en el código.
+const { getJwtSecret } = require('../config/secrets');
 
 const requireAuth = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -16,7 +18,7 @@ const requireAuth = async (req, res, next) => {
   }
 
   try {
-    const verified = jwt.verify(token, secretKey);
+    const verified = jwt.verify(token, getJwtSecret());
 
     // Si el token incluye identificador de sesión (jti), validar que no haya sido revocada
     if (verified.jti) {
@@ -24,7 +26,8 @@ const requireAuth = async (req, res, next) => {
         'SELECT id, revoked FROM user_sessions WHERE session_token = ?',
         [verified.jti]
       );
-      if (session && Number(session.revoked) === 1) {
+      // Sesión inexistente (borrada al eliminar un hotel/usuario) = token inválido
+      if (!session || Number(session.revoked) === 1) {
         return res.status(401).json({
           error: 'Tu sesión fue cerrada o revocada por un administrador. Inicia sesión nuevamente.'
         });
@@ -51,7 +54,7 @@ const requireAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    return res.status(401).json({ error: 'Token inválido o expirado.' });
+    return res.status(401).json({ error: 'Tu sesión venció. Inicia sesión nuevamente.' });
   }
 };
 
@@ -62,10 +65,9 @@ const requireRole = (...allowedRoles) => {
     }
     const effectiveRole = req.hotelRole || req.user.role;
     if (
-      req.user.role === 'PROPIETARIO' ||
-      req.user.role === 'ADMIN' ||
-      allowedRoles.includes(effectiveRole) ||
-      allowedRoles.includes(req.user.role)
+      effectiveRole === 'PROPIETARIO' ||
+      effectiveRole === 'ADMIN' ||
+      allowedRoles.includes(effectiveRole)
     ) {
       return next();
     }
@@ -80,7 +82,8 @@ const requirePermission = (...requiredPermissions) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Usuario no autenticado.' });
     }
-    if (req.user.role === 'PROPIETARIO' || req.user.role === 'ADMIN') {
+    const effectiveRole = req.hotelRole || req.user.role;
+    if (effectiveRole === 'PROPIETARIO' || effectiveRole === 'ADMIN') {
       return next();
     }
     const userPerms = req.user.permissions || [];
@@ -96,5 +99,5 @@ const requirePermission = (...requiredPermissions) => {
 
 requireAuth.requireRole = requireRole;
 requireAuth.requirePermission = requirePermission;
-requireAuth.secretKey = secretKey;
+requireAuth.getJwtSecret = getJwtSecret;
 module.exports = requireAuth;

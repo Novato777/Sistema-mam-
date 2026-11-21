@@ -848,7 +848,7 @@ export default function Contabilidad() {
             )}
           </div>
 
-          <div className="space-y-3">
+          <div className="list-scroll space-y-3">
             {entries.map((je) => (
               <div
                 key={je.id}
@@ -980,7 +980,7 @@ export default function Contabilidad() {
               </button>
             </div>
 
-            <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
+            <div className="flex flex-wrap gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
               {[
                 { id: 'PYG', label: 'Estado Resultados (P&G)' },
                 { id: 'BALANCE', label: 'Balance General' },
@@ -1347,7 +1347,7 @@ export default function Contabilidad() {
               </form>
             )}
 
-            <div className="space-y-2">
+            <div className="list-scroll space-y-2">
               {reconciliations.map((r) => (
                 <div key={r.id} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-between items-center">
                   <div>
@@ -1405,7 +1405,7 @@ export default function Contabilidad() {
                 />
               </form>
             )}
-            <div className="space-y-2">
+            <div className="list-scroll space-y-2">
               {periods.map((p) => (
                 <div key={p.id} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <div>
@@ -1652,7 +1652,7 @@ export default function Contabilidad() {
               </form>
             )}
 
-            <div className="space-y-2">
+            <div className="list-scroll space-y-2">
               {dianState.invoices.map((inv) => (
                 <div key={inv.id} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
                   <div>
@@ -1707,7 +1707,7 @@ export default function Contabilidad() {
 
             <div className="space-y-2">
               {entryLines.map((l, idx) => (
-                <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+                <div key={idx} className="grid grid-cols-6 sm:grid-cols-12 gap-2 items-center p-2 sm:p-0 rounded-xl sm:rounded-none border sm:border-0 border-slate-200 dark:border-slate-700">
                   <select
                     value={l.account_code}
                     onChange={(e) =>
@@ -1715,7 +1715,7 @@ export default function Contabilidad() {
                         prev.map((x, i) => (i === idx ? { ...x, account_code: e.target.value } : x))
                       )
                     }
-                    className="col-span-5 px-2 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                    className="col-span-5 sm:col-span-5 px-2 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
                   >
                     {detailAccounts.map((a) => (
                       <option key={a.code} value={a.code}>
@@ -1731,7 +1731,7 @@ export default function Contabilidad() {
                         prev.map((x, i) => (i === idx ? { ...x, description: e.target.value } : x))
                       )
                     }
-                    className="col-span-2 px-2 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                    className="col-span-6 sm:col-span-2 px-2 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
                   />
                   <input
                     type="number"
@@ -1743,7 +1743,7 @@ export default function Contabilidad() {
                         prev.map((x, i) => (i === idx ? { ...x, debit: e.target.value, credit: Number(e.target.value) > 0 ? '0' : x.credit } : x))
                       )
                     }
-                    className="col-span-2 px-2 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right"
+                    className="col-span-3 sm:col-span-2 px-2 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right"
                   />
                   <input
                     type="number"
@@ -1755,12 +1755,13 @@ export default function Contabilidad() {
                         prev.map((x, i) => (i === idx ? { ...x, credit: e.target.value, debit: Number(e.target.value) > 0 ? '0' : x.debit } : x))
                       )
                     }
-                    className="col-span-2 px-2 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right"
+                    className="col-span-3 sm:col-span-2 px-2 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right"
                   />
                   <button
                     type="button"
                     onClick={() => setEntryLines((prev) => prev.filter((_, i) => i !== idx))}
-                    className="col-span-1 text-rose-500 flex justify-center"
+                    aria-label="Quitar línea"
+                    className="col-span-1 row-start-1 col-start-6 sm:row-start-auto sm:col-start-auto h-10 text-rose-500 flex items-center justify-center"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -1780,7 +1781,7 @@ export default function Contabilidad() {
               </button>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 flex justify-between items-center font-bold">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 flex flex-wrap justify-between items-center gap-2 font-bold">
               <span>
                 Débitos: {formatCOP(draftDebitSum)} | Créditos: {formatCOP(draftCreditSum)}
               </span>

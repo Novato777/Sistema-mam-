@@ -28,23 +28,24 @@ const requireHotelAccess = async (req, res, next) => {
     }
 
     if (req.user) {
-      const isOwner = req.user.role === 'PROPIETARIO' || req.user.role === 'ADMIN';
+      // SEGURIDAD: todos (incluidos los propietarios) deben estar vinculados a
+      // este hotel. Antes el rol PROPIETARIO saltaba esta validación y el dueño
+      // de un hotel cliente podía leer y modificar los datos de cualquier otro.
       const userHotel = await db.get(
         'SELECT role, active FROM user_hotels WHERE user_id = ? AND hotel_id = ?',
         [req.user.id, hotel.id]
       );
 
-      if (!isOwner && (!userHotel || Number(userHotel.active) === 0)) {
+      if (!userHotel || Number(userHotel.active) === 0) {
         return res.status(403).json({
           error: 'Acceso denegado: No tienes autorización para operar en este establecimiento hotelero.'
         });
       }
 
-      const effectiveHotelRole = isOwner
-        ? 'PROPIETARIO'
-        : userHotel
-        ? userHotel.role
-        : req.user.role;
+      const linkRole = userHotel.role === 'ADMIN' ? 'PROPIETARIO' : userHotel.role;
+      const globalOwner = req.user.role === 'PROPIETARIO' || req.user.role === 'ADMIN';
+      // Un propietario global vinculado al hotel conserva acceso total en él.
+      const effectiveHotelRole = globalOwner ? 'PROPIETARIO' : linkRole || req.user.role;
 
       req.hotelRole = effectiveHotelRole;
       req.user.permissions = resolveEffectivePermissions(

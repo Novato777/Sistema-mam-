@@ -764,7 +764,7 @@ export default function Inventario() {
             ) : visibleProducts.length === 0 ? (
               <p className="p-10 text-center text-sm font-semibold text-slate-500">No hay productos con ese nombre.</p>
             ) : (
-              <ul className="divide-y divide-slate-200 dark:divide-slate-700">
+              <ul className="list-scroll divide-y divide-slate-200 dark:divide-slate-700">
                 {visibleProducts.map((p) => {
                   const look = stockLook(p);
                   return (
@@ -837,7 +837,7 @@ export default function Inventario() {
                   title="¿Qué se gasta en cada venta?"
                   subtitle="Ej: cada 'Desayuno' vendido gasta 2 huevos y 1 pan. Así el inventario baja solo."
                 >
-                  <ul className="divide-y divide-slate-200 dark:divide-slate-700">
+                  <ul className="list-scroll divide-y divide-slate-200 dark:divide-slate-700">
                     {serviceCatalog.map((s) => (
                       <li key={s.id} className="py-3 flex items-center gap-3">
                         <div className="min-w-0 flex-1">
@@ -893,7 +893,7 @@ export default function Inventario() {
             {purchases.length === 0 ? (
               <p className="p-10 text-center text-sm font-semibold text-slate-500">Aún no hay compras registradas.</p>
             ) : (
-              <ul className="divide-y divide-slate-200 dark:divide-slate-700">
+              <ul className="list-scroll divide-y divide-slate-200 dark:divide-slate-700">
                 {purchases.map((po) => {
                   const voided = po.status === 'ANULADA';
                   const draft = po.status === 'BORRADOR';
@@ -961,7 +961,7 @@ export default function Inventario() {
             {suppliers.length === 0 ? (
               <EmptyText>No hay proveedores. No es obligatorio tenerlos.</EmptyText>
             ) : (
-              <ul className="divide-y divide-slate-200 dark:divide-slate-700">
+              <ul className="list-scroll divide-y divide-slate-200 dark:divide-slate-700">
                 {suppliers.map((s) => (
                   <li key={s.id} className="py-3 flex items-center gap-3">
                     <div className="min-w-0 flex-1">
@@ -988,7 +988,7 @@ export default function Inventario() {
       ===================================================================== */}
       {activeTab === 'MOVIMIENTOS' && (
         <div className="space-y-4">
-          <section className={`p-4 sm:p-5 space-y-3 ${SECTION('slate')}`}>
+          <section className={`p-4 sm:p-5 space-y-3 ${SECTION('amber')}`}>
             <Field label="¿De qué producto quieres ver el historial?">
               <select value={historyProductId} onChange={(e) => setHistoryProductId(e.target.value)} className={INPUT}>
                 <option value="">Todos (últimos movimientos)</option>
@@ -1019,13 +1019,13 @@ export default function Inventario() {
             )}
           </section>
 
-          <section className={SECTION('slate')}>
+          <section className={SECTION('teal')}>
             {(() => {
               const list = historyProductId ? history?.movements || [] : recentMovements;
               if (list.length === 0)
                 return <p className="p-10 text-center text-sm font-semibold text-slate-500">No hay movimientos todavía.</p>;
               return (
-                <ul className="divide-y divide-slate-200 dark:divide-slate-700">
+                <ul className="list-scroll divide-y divide-slate-200 dark:divide-slate-700">
                   {list.map((m) => {
                     const inc = m.direction === 'IN';
                     const out = m.direction === 'OUT';

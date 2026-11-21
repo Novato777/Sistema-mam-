@@ -801,7 +801,7 @@ export default function Reservas() {
       )}
 
       {/* KPIs Operativos y Financieros de Reservas */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xs">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
             Reservas Activas
@@ -1254,7 +1254,7 @@ export default function Reservas() {
                     No hay habitaciones disponibles que coincidan con las fechas y filtros seleccionados.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="list-scroll grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {availableRooms.map((room) => {
                       const isSelected = selectedRoomRates[room.id] !== undefined;
                       return (
